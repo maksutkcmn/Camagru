@@ -45,11 +45,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	if err = services.SendVerifyEmail(user.Email, verifyToken); err != nil {
-		http.Error(w, "Email not Send", http.StatusInternalServerError)
-		return
-	}
-	
 	response, err := exec.ExecContext(ctx, user.Username, user.Email, hashedPassword, verifyToken)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
@@ -57,17 +52,23 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-
+	
 	rowsAffected, _ := response.RowsAffected()
 	if rowsAffected == 0 {
 		http.Error(w, "No rows were inserted", http.StatusInternalServerError)
 		return
 	}
-
+	
 	userID, err := response.LastInsertId()
 	if err != nil {
 		http.Error(w, "Error getting userID", http.StatusInternalServerError)
+		return
+	}
+
+	if err = services.SendVerifyEmail(user.Email, verifyToken); err != nil {
+		http.Error(w, "Email not Send", http.StatusInternalServerError)
 		return
 	}
 	

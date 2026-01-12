@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/smtp"
+	"os"
 )
 
 func GenerateVerifyToken() (string, error) {
@@ -16,12 +17,13 @@ func GenerateVerifyToken() (string, error) {
 }
 
 func SendVerifyEmail(toEmail, token string) error  {
-	from := "makokcmn@gmail.com"
-    password := "wqro nuwk hheh ilry"
-    smtpHost := "smtp.gmail.com"
-    smtpPort := "587"
+	from := os.Getenv("SMTP_FROM")
+    password := os.Getenv("SMTP_PASSWORD")
+    smtpHost := os.Getenv("SMTP_HOST")
+    smtpPort := os.Getenv("SMTP_PORT")
+    appURL := os.Getenv("APP_URL")
 
-    link := "http://localhost:8080/verify?token=" + token
+    link := appURL + "/verify?token=" + token
 
     headers := make(map[string]string)
     headers["From"] = from
