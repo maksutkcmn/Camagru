@@ -76,7 +76,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	responseBytes, err := json.Marshal(jsonResponse)
     if err != nil {
-		http.Error(w, "JSON oluşturulamadı", http.StatusInternalServerError)
+		http.Error(w, "JSON cant create", http.StatusInternalServerError)
         return
     }
 	

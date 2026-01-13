@@ -2,7 +2,9 @@ package services
 
 import (
 	"errors"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -71,4 +73,23 @@ func ExtractUsername(tokenString string) (string, error) {
 		return "", err
 	}
 	return claims.Username, nil
+}
+
+func GetUserIDFromRequest(r *http.Request) (int, error) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return 0, errors.New("authorization header required")
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == authHeader {
+		return 0, errors.New("invalid authorization format")
+	}
+
+	userID, err := ExtractUserID(tokenString)
+	if err != nil {
+		return 0, err
+	}
+
+	return userID, nil
 }

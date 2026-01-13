@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-	// Load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: .env file not found")
 	}
@@ -30,6 +29,11 @@ func main() {
 
 	http.HandleFunc("POST /api/register", controllers.Register)
 	http.HandleFunc("POST /api/login", controllers.Login)
+
+	http.HandleFunc("POST /api/create/post", controllers.CreatePost)
+	http.HandleFunc("POST /api/comment/post", controllers.CommentPost)
+	http.HandleFunc("GET /api/like/post/{postid}", controllers.LikePost)
+
 	http.HandleFunc("GET /verify", controllers.VerifyEmail)
 
 	http.ListenAndServe(":8080", nil)
