@@ -33,6 +33,10 @@ func main() {
 	http.HandleFunc("POST /api/create/post", controllers.CreatePost)
 	http.HandleFunc("POST /api/comment/post", controllers.CommentPost)
 	http.HandleFunc("GET /api/like/post/{postid}", controllers.LikePost)
+	
+	http.HandleFunc("PATCH /api/set/username", controllers.SetUsername)
+	http.HandleFunc("PATCH /api/set/email", controllers.SetEmail)
+	http.HandleFunc("PATCH /api/set/password", controllers.SetPassword)
 
 	http.HandleFunc("GET /verify", controllers.VerifyEmail)
 

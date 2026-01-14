@@ -28,6 +28,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	
 	exec, err := globals.DB.PrepareContext(ctx, query)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			http.Error(w, "Timeout", http.StatusInternalServerError)
+			return
+		}
 		http.Error(w, "DB Prepare Error", http.StatusInternalServerError)
 		return
 	}

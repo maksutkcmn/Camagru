@@ -1,6 +1,7 @@
 package services
 
 import (
+	"camagru/models"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -49,7 +50,66 @@ func SendVerifyEmail(toEmail, token string) error  {
     fullMessage := []byte(message + "\r\n" + body)
 
     auth := smtp.PlainAuth("", from, password, smtpHost)
-    
+
     err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{toEmail}, fullMessage)
     return err
+}
+
+func SendNotificationEmail(toEmail string, notification models.NotificationEmail) error {
+	from := os.Getenv("SMTP_FROM")
+	password := os.Getenv("SMTP_PASSWORD")
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+
+	subject := notification.EmailType.Subject()
+	body := generateNotificationBody(notification)
+
+	headers := make(map[string]string)
+	headers["From"] = from
+	headers["To"] = toEmail
+	headers["Subject"] = subject
+	headers["MIME-Version"] = "1.0"
+	headers["Content-Type"] = "text/html; charset=\"UTF-8\""
+
+	message := ""
+	for k, v := range headers {
+		message += fmt.Sprintf("%s: %s\r\n", k, v)
+	}
+
+	fullMessage := []byte(message + "\r\n" + body)
+
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+
+	return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{toEmail}, fullMessage)
+}
+
+func generateNotificationBody(notification models.NotificationEmail) string {
+	var content string
+
+	switch notification.EmailType {
+	case models.EmailTypePostLiked:
+		content = fmt.Sprintf(`
+			<h2>Merhaba %s!</h2>
+			<p><strong>%s</strong> postunu beğendi.</p>
+		`, notification.ToUsername, notification.FromUsername)
+
+	case models.EmailTypePostCommented:
+		content = fmt.Sprintf(`
+			<h2>Merhaba %s!</h2>
+			<p><strong>%s</strong> postuna yorum yaptı.</p>
+		`, notification.ToUsername, notification.FromUsername)
+
+	default:
+		content = "<p>Yeni bir bildiriminiz var.</p>"
+	}
+
+	return fmt.Sprintf(`
+		<html>
+			<body style="font-family: Arial, sans-serif; padding: 20px;">
+				%s
+				<hr>
+				<p style="color: #666; font-size: 12px;">Bu email Camagru tarafından gönderilmiştir.</p>
+			</body>
+		</html>
+	`, content)
 }
