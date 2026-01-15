@@ -37,6 +37,7 @@ func main() {
 	http.HandleFunc("PATCH /api/set/username", controllers.SetUsername)
 	http.HandleFunc("PATCH /api/set/email", controllers.SetEmail)
 	http.HandleFunc("PATCH /api/set/password", controllers.SetPassword)
+	http.HandleFunc("PATCH /api/set/notifications", controllers.SetNotifications)
 
 	http.HandleFunc("GET /verify", controllers.VerifyEmail)
 

@@ -106,9 +106,10 @@ func CommentPost(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	checkQuery := "SELECT id FROM posts WHERE id = ?"
+	checkQuery := "SELECT id, user_id FROM posts WHERE id = ?"
 	var postID int
-	err = globals.DB.QueryRowContext(ctx, checkQuery, comment.PostID).Scan(&postID)
+	var toUserID int
+	err = globals.DB.QueryRowContext(ctx, checkQuery, comment.PostID).Scan(&postID, &toUserID)
 	if err != nil {
 		http.Error(w, "Post bulunamadı", http.StatusNotFound)
 		return
@@ -141,6 +142,27 @@ func CommentPost(w http.ResponseWriter, r *http.Request)  {
 	commentID, err := result.LastInsertId()
 	if err != nil {
 		http.Error(w, "Error getting commentID", http.StatusInternalServerError)
+		return
+	}
+
+	emailQuery := "SELECT username, email FROM users WHERE id = ?"
+	var toUsername string
+	var toEmail string
+	err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail)
+
+	var fromUsername string
+	err = globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
+
+	notifications := models.NotificationEmail{
+		ToUsername:   toUsername,
+		FromUserID:   int64(userID),
+		FromUsername: fromUsername,
+		EmailType:    models.EmailTypePostCommented,
+		PostID:       int64(comment.PostID),
+	}
+
+	if err = services.SendNotificationEmail(toEmail, notifications); err != nil {
+		http.Error(w, "Email not send", http.StatusInternalServerError)
 		return
 	}
 
@@ -182,9 +204,10 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	checkPostQuery := "SELECT id FROM posts WHERE id = ?"
+	checkPostQuery := "SELECT id, user_id FROM posts WHERE id = ?"
 	var existingPostID int
-	err = globals.DB.QueryRowContext(ctx, checkPostQuery, postID).Scan(&existingPostID)
+	var toUserID int
+	err = globals.DB.QueryRowContext(ctx, checkPostQuery, postID).Scan(&existingPostID, &toUserID)
 	if err != nil {
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
@@ -195,16 +218,16 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 	err = globals.DB.QueryRowContext(ctx, checkLikeQuery, userID, postID).Scan(&likeID)
 
 	var query string
-	var message string
+	var message models.EmailType
 	var action string
 
 	if err != nil {
 		query = "INSERT INTO posts_likes (user_id, post_id) VALUES (?, ?)"
-		message = "Like eklendi"
+		message = models.EmailTypePostLiked
 		action = "liked"
 	} else {
 		query = "DELETE FROM posts_likes WHERE user_id = ? AND post_id = ?"
-		message = "Like kaldırıldı"
+		message = models.EmailTypePostUnLiked
 		action = "unliked"
 	}
 
@@ -231,9 +254,29 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
+	emailQuery := "SELECT username, email FROM users WHERE id = ?"
+	var toUsername string
+	var toEmail string
+	err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail)
+
+	var fromUsername string
+	err = globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
+
+	notifications := models.NotificationEmail{
+		ToUsername:   toUsername,
+		FromUserID:   int64(userID),
+		FromUsername: fromUsername,
+		EmailType:    message,
+	}
+
+	if err = services.SendNotificationEmail(toEmail, notifications); err != nil {
+		http.Error(w, "Email not send", http.StatusInternalServerError)
+		return
+	}
+
 	jsonResponse := map[string]interface{}{
 		"success": true,
-		"message": message,
+		"message": "Beğeni bildirimi gönderildi",
 		"data": map[string]interface{}{
 			"post_id": postID,
 			"user_id": userID,

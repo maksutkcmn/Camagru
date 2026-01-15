@@ -3,14 +3,17 @@ package models
 type EmailType int
 
 const (
-	EmailTypePostLiked    EmailType = iota // Post beğenildiğinde
-	EmailTypePostCommented                  // Posta yorum yapıldığında
+	EmailTypePostLiked    EmailType = iota 
+	EmailTypePostUnLiked                  
+	EmailTypePostCommented                 
 )
 
 func (e EmailType) String() string {
 	switch e {
 	case EmailTypePostLiked:
 		return "Post Beğenildi"
+	case EmailTypePostUnLiked:
+		return "Post Beğenisi Kaldırıldı"
 	case EmailTypePostCommented:
 		return "Yorum Yapıldı"
 	default:
@@ -22,6 +25,8 @@ func (e EmailType) Subject() string {
 	switch e {
 	case EmailTypePostLiked:
 		return "Postun Beğenildi!"
+	case EmailTypePostUnLiked:
+		return "Post Beğenisi Kaldırıldı!"
 	case EmailTypePostCommented:
 		return "Postuna Yorum Yapıldı!"
 	default:
