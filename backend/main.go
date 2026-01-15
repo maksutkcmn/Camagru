@@ -32,12 +32,17 @@ func main() {
 
 	http.HandleFunc("POST /api/create/post", controllers.CreatePost)
 	http.HandleFunc("POST /api/comment/post", controllers.CommentPost)
-	http.HandleFunc("GET /api/like/post/{postid}", controllers.LikePost)
+	http.HandleFunc("GET /api/like/post/{post_id}", controllers.LikePost)
 	
 	http.HandleFunc("PATCH /api/set/username", controllers.SetUsername)
 	http.HandleFunc("PATCH /api/set/email", controllers.SetEmail)
 	http.HandleFunc("PATCH /api/set/password", controllers.SetPassword)
 	http.HandleFunc("PATCH /api/set/notifications", controllers.SetNotifications)
+	
+	http.HandleFunc("GET /api/get/me", controllers.GetMe)
+	http.HandleFunc("GET /api/get/user/{username}", controllers.GetUserByID)
+	http.HandleFunc("GET /api/get/posts", controllers.GetUserPosts)
+	http.HandleFunc("GET /api/get/post/comments/{post_id}", controllers.GetPostComments)
 
 	http.HandleFunc("GET /verify", controllers.VerifyEmail)
 

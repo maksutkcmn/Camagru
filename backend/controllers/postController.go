@@ -198,7 +198,7 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	postIDstr := r.PathValue("postid")
+	postIDstr := r.PathValue("post_id")
 	postID, err := strconv.Atoi(postIDstr)
 	if err != nil {
 		http.Error(w, "Post not found", http.StatusBadRequest)
