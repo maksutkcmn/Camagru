@@ -145,27 +145,31 @@ func CommentPost(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	emailQuery := "SELECT username, email FROM users WHERE id = ?"
+	emailQuery := "SELECT username, email, notifications, is_verified FROM users WHERE id = ?"
+	var isVerified bool
+	var isNotifications bool
 	var toUsername string
 	var toEmail string
-	err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail)
+	err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail, &isNotifications, &isVerified)
 
-	var fromUsername string
-	err = globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
-
-	notifications := models.NotificationEmail{
-		ToUsername:   toUsername,
-		FromUserID:   int64(userID),
-		FromUsername: fromUsername,
-		EmailType:    models.EmailTypePostCommented,
-		PostID:       int64(comment.PostID),
+	if isVerified && isNotifications {
+		var fromUsername string
+		err = globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
+		
+		notifications := models.NotificationEmail{
+			ToUsername:   toUsername,
+			FromUserID:   int64(userID),
+			FromUsername: fromUsername,
+			EmailType:    models.EmailTypePostCommented,
+			PostID:       int64(comment.PostID),
+		}
+		
+		if err = services.SendNotificationEmail(toEmail, notifications); err != nil {
+			http.Error(w, "Email not send", http.StatusInternalServerError)
+			return
+		}
 	}
-
-	if err = services.SendNotificationEmail(toEmail, notifications); err != nil {
-		http.Error(w, "Email not send", http.StatusInternalServerError)
-		return
-	}
-
+		
 	jsonResponse := map[string]interface{}{
 		"success": true,
 		"message": "Yorum eklendi",
@@ -254,26 +258,30 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	emailQuery := "SELECT username, email FROM users WHERE id = ?"
+	emailQuery := "SELECT username, email, notifications, is_verified FROM users WHERE id = ?"
+	var isVerified bool
+	var isNotifications bool
 	var toUsername string
 	var toEmail string
-	err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail)
+	err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail, &isNotifications, &isVerified)
 
-	var fromUsername string
-	err = globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
-
-	notifications := models.NotificationEmail{
-		ToUsername:   toUsername,
-		FromUserID:   int64(userID),
-		FromUsername: fromUsername,
-		EmailType:    message,
+	if isVerified && isNotifications {
+		var fromUsername string
+		err = globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
+		
+		notifications := models.NotificationEmail{
+			ToUsername:   toUsername,
+			FromUserID:   int64(userID),
+			FromUsername: fromUsername,
+			EmailType:    message,
+		}
+		
+		if err = services.SendNotificationEmail(toEmail, notifications); err != nil {
+			http.Error(w, "Email not send", http.StatusInternalServerError)
+			return
+		}
 	}
-
-	if err = services.SendNotificationEmail(toEmail, notifications); err != nil {
-		http.Error(w, "Email not send", http.StatusInternalServerError)
-		return
-	}
-
+		
 	jsonResponse := map[string]interface{}{
 		"success": true,
 		"message": "Beğeni bildirimi gönderildi",
