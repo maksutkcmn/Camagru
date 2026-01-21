@@ -31,6 +31,7 @@ func main() {
 	http.HandleFunc("POST /api/login", controllers.Login)
 
 	http.HandleFunc("POST /api/create/post", controllers.CreatePost)
+	http.HandleFunc("GET /api/delete/post/{post_id}", controllers.DeletePost)
 	http.HandleFunc("POST /api/comment/post", controllers.CommentPost)
 	http.HandleFunc("GET /api/like/post/{post_id}", controllers.LikePost)
 	
@@ -38,6 +39,8 @@ func main() {
 	http.HandleFunc("PATCH /api/set/email", controllers.SetEmail)
 	http.HandleFunc("PATCH /api/set/password", controllers.SetPassword)
 	http.HandleFunc("PATCH /api/set/notifications", controllers.SetNotifications)
+	http.HandleFunc("POST /api/forgot-password", controllers.ForgotPassword)
+	http.HandleFunc("POST /api/reset-password", controllers.ResetPassword)
 	
 	http.HandleFunc("GET /api/get/me", controllers.GetMe)
 	http.HandleFunc("GET /api/get/user/{username}", controllers.GetUserByID)

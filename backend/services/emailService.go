@@ -113,3 +113,22 @@ func generateNotificationBody(notification models.NotificationEmail) string {
 		</html>
 	`, content)
 }
+
+func SendResetEmail(toEmail, token string) error {
+	from := os.Getenv("SMTP_FROM")
+	password := os.Getenv("SMTP_PASSWORD")
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+
+	link := fmt.Sprintf("http://localhost:8080/reset-password?token=%s", token)
+    
+    subject := "Şifre Sıfırlama Talebi\n"
+    mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+    body := fmt.Sprintf("<html><body><h3>Şifreni sıfırlamak için tıkla:</h3><a href=\"%s\">Şifremi Sıfırla</a></body></html>", link)
+    
+    msg := []byte(subject + mime + body)
+
+    auth := smtp.PlainAuth("", from, password, smtpHost)
+    err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{toEmail}, msg)
+    return err
+}

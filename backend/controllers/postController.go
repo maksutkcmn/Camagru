@@ -85,6 +85,80 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseBytes)
 }
 
+func DeletePost(w http.ResponseWriter, r *http.Request) {
+	userID, err := services.GetUserIDFromRequest(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	postIDstr := r.PathValue("post_id")
+	postID, err := strconv.Atoi(postIDstr)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	checkQuery := "SELECT user_id FROM posts WHERE id = ?"
+	var postOwnerID int
+	err = globals.DB.QueryRowContext(ctx, checkQuery, postID).Scan(&postOwnerID)
+	if err != nil {
+		http.Error(w, "Post not found", http.StatusNotFound)
+		return
+	}
+
+	if postOwnerID != userID {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return
+	}
+
+	deleteQuery := "DELETE FROM posts WHERE id = ? AND user_id = ?"
+	exec, err := globals.DB.PrepareContext(ctx, deleteQuery)
+	if err != nil {
+		http.Error(w, "DB Prepare Error", http.StatusInternalServerError)
+		return
+	}
+	defer exec.Close()
+
+	result, err := exec.ExecContext(ctx, postID, userID)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			http.Error(w, "Timeout", http.StatusInternalServerError)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		http.Error(w, "Post could not be deleted", http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse := map[string]interface{}{
+		"success": true,
+		"message": "Gönderi silindi",
+		"data": map[string]interface{}{
+			"post_id": postID,
+			"user_id": userID,
+		},
+	}
+
+	responseBytes, err := json.Marshal(jsonResponse)
+	if err != nil {
+		http.Error(w, "JSON cant create", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseBytes)
+}
+
 func CommentPost(w http.ResponseWriter, r *http.Request)  {
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
