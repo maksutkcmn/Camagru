@@ -23,3 +23,22 @@ type PostCommentsDTO struct {
 	Comment		string	`json:"comment"`
 	CreatedAt 	string 	`json:"created_at"`
 }
+
+type FeedPostDTO struct {
+	ID           int    `json:"id"`
+	UserID       int    `json:"user_id"`
+	Username     string `json:"username"`
+	ImagePath    string `json:"image_path"`
+	LikeCount    int    `json:"like_count"`
+	CommentCount int    `json:"comment_count"`
+	CreatedAt    string `json:"created_at"`
+}
+
+type PaginationInfo struct {
+	CurrentPage int  `json:"current_page"`
+	TotalPages  int  `json:"total_pages"`
+	TotalPosts  int  `json:"total_posts"`
+	Limit       int  `json:"limit"`
+	HasNext     bool `json:"has_next"`
+	HasPrev     bool `json:"has_prev"`
+}

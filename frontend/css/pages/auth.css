@@ -1,0 +1,108 @@
+/* Auth Pages (Login, Register, Forgot Password, Reset Password) */
+.auth-page {
+    min-height: calc(100vh - var(--navbar-height));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+}
+
+.auth-form {
+    width: 100%;
+}
+
+.auth-form .btn--block {
+    margin-top: var(--spacing-md);
+}
+
+/* Verify Email Page */
+.verify-page {
+    min-height: calc(100vh - var(--navbar-height));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.verify-page__icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--spacing-lg);
+}
+
+.verify-page__icon--success {
+    color: var(--success);
+}
+
+.verify-page__icon--error {
+    color: var(--error);
+}
+
+.verify-page__title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+}
+
+.verify-page__message {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Password Reset Pages */
+.reset-password-page {
+    min-height: calc(100vh - var(--navbar-height));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+}
+
+.reset-password-card {
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+}
+
+.reset-password-card__title {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.reset-password-card__description {
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    font-size: 14px;
+}
+
+/* Success/Error States */
+.auth-success {
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.auth-success__icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-lg);
+    color: var(--success);
+}
+
+.auth-success__title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+}
+
+.auth-success__message {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+}

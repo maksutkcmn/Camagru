@@ -223,3 +223,124 @@ func GetPostComments(w http.ResponseWriter, r *http.Request)  {
 	w.WriteHeader(http.StatusOK)
 	w.Write(responseBytes)
 }
+
+func GetFeed(w http.ResponseWriter, r *http.Request) {
+	_, err := services.GetUserIDFromRequest(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	// Parse query parameters
+	pageStr := r.URL.Query().Get("page")
+	limitStr := r.URL.Query().Get("limit")
+
+	page := 1
+	limit := 12
+
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 50 {
+			limit = l
+		}
+	}
+
+	offset := (page - 1) * limit
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	// Get total count
+	var totalPosts int
+	countQuery := "SELECT COUNT(*) FROM posts"
+	err = globals.DB.QueryRowContext(ctx, countQuery).Scan(&totalPosts)
+	if err != nil {
+		http.Error(w, "DB Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Get posts with user info and counts
+	query := `
+		SELECT
+			p.id,
+			p.user_id,
+			u.username,
+			p.image_path,
+			(SELECT COUNT(*) FROM posts_likes WHERE post_id = p.id) as like_count,
+			(SELECT COUNT(*) FROM posts_comments WHERE post_id = p.id) as comment_count,
+			p.created_at
+		FROM posts p
+		JOIN users u ON p.user_id = u.id
+		ORDER BY p.created_at DESC
+		LIMIT ? OFFSET ?
+	`
+
+	rows, err := globals.DB.QueryContext(ctx, query, limit, offset)
+	if err != nil {
+		http.Error(w, "DB Error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var posts []models.FeedPostDTO
+
+	for rows.Next() {
+		var post models.FeedPostDTO
+		if err := rows.Scan(
+			&post.ID,
+			&post.UserID,
+			&post.Username,
+			&post.ImagePath,
+			&post.LikeCount,
+			&post.CommentCount,
+			&post.CreatedAt,
+		); err != nil {
+			http.Error(w, "DB Error", http.StatusInternalServerError)
+			return
+		}
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		http.Error(w, "DB Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Calculate pagination info
+	totalPages := (totalPosts + limit - 1) / limit
+	if totalPages == 0 {
+		totalPages = 1
+	}
+
+	pagination := models.PaginationInfo{
+		CurrentPage: page,
+		TotalPages:  totalPages,
+		TotalPosts:  totalPosts,
+		Limit:       limit,
+		HasNext:     page < totalPages,
+		HasPrev:     page > 1,
+	}
+
+	jsonResponse := map[string]interface{}{
+		"success": true,
+		"data": map[string]interface{}{
+			"posts":      posts,
+			"pagination": pagination,
+		},
+	}
+
+	responseBytes, err := json.Marshal(jsonResponse)
+	if err != nil {
+		http.Error(w, "JSON cant create", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseBytes)
+}

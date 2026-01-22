@@ -1,0 +1,127 @@
+/* Card Component */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.card__header {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.card__body {
+    padding: var(--spacing-md);
+}
+
+.card__footer {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--border);
+    background-color: var(--bg-secondary);
+}
+
+/* Auth Card */
+.auth-card {
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+}
+
+.auth-card__title {
+    font-size: 24px;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+    color: var(--text-primary);
+}
+
+.auth-card__footer {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border);
+}
+
+.auth-card__footer a {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.auth-card__footer span {
+    color: var(--text-muted);
+    margin: 0 var(--spacing-sm);
+}
+
+/* Profile Card */
+.profile-card {
+    display: flex;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-xl);
+}
+
+.profile-card__avatar {
+    flex-shrink: 0;
+}
+
+.profile-card__avatar img {
+    width: 150px;
+    height: 150px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    border: 3px solid var(--border);
+}
+
+.profile-card__info {
+    flex: 1;
+}
+
+.profile-card__username {
+    font-size: 28px;
+    font-weight: 300;
+    margin-bottom: var(--spacing-md);
+}
+
+.profile-card__stats {
+    display: flex;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
+}
+
+.profile-card__stat {
+    font-size: 16px;
+}
+
+.profile-card__stat strong {
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .profile-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-card__avatar img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-card__stats {
+        justify-content: center;
+    }
+}

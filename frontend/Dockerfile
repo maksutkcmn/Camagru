@@ -1,34 +1,16 @@
-# Frontend Dockerfile (Placeholder)
-# This will be updated when frontend is implemented
+# Frontend Dockerfile - Vanilla JS with BusyBox httpd
+FROM busybox:1.36
 
-# Example for React/Vite application:
-#
-# # Build stage
-# FROM node:20-alpine AS builder
-#
-# WORKDIR /app
-#
-# # Copy package files
-# COPY package*.json ./
-#
-# # Install dependencies
-# RUN npm ci
-#
-# # Copy source code
-# COPY . .
-#
-# # Build the application
-# RUN npm run build
-#
-# # Production stage
-# FROM nginx:alpine
-#
-# # Copy built files to nginx
-# COPY --from=builder /app/dist /usr/share/nginx/html
-#
-# # Copy nginx configuration (if needed)
-# # COPY nginx.conf /etc/nginx/conf.d/default.conf
-#
-# EXPOSE 80
-#
-# CMD ["nginx", "-g", "daemon off;"]
+# Create directory for static files
+WORKDIR /var/www
+
+# Copy static files
+COPY index.html .
+COPY css/ ./css/
+COPY js/ ./js/
+COPY assets/ ./assets/
+
+EXPOSE 80
+
+# Run BusyBox httpd
+CMD ["busybox", "httpd", "-f", "-v", "-p", "80"]

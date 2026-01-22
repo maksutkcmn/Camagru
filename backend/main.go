@@ -1,8 +1,8 @@
 package main
 
 import (
-	"camagru/globals"
 	"camagru/controllers"
+	"camagru/globals"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +10,22 @@ import (
 
 	"github.com/joho/godotenv"
 )
+
+// CORS middleware
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -27,27 +43,39 @@ func main() {
 	}
 	defer globals.CloseDB()
 
-	http.HandleFunc("POST /api/register", controllers.Register)
-	http.HandleFunc("POST /api/login", controllers.Login)
+	mux := http.NewServeMux()
 
-	http.HandleFunc("POST /api/create/post", controllers.CreatePost)
-	http.HandleFunc("GET /api/delete/post/{post_id}", controllers.DeletePost)
-	http.HandleFunc("POST /api/comment/post", controllers.CommentPost)
-	http.HandleFunc("GET /api/like/post/{post_id}", controllers.LikePost)
-	
-	http.HandleFunc("PATCH /api/set/username", controllers.SetUsername)
-	http.HandleFunc("PATCH /api/set/email", controllers.SetEmail)
-	http.HandleFunc("PATCH /api/set/password", controllers.SetPassword)
-	http.HandleFunc("PATCH /api/set/notifications", controllers.SetNotifications)
-	http.HandleFunc("POST /api/forgot-password", controllers.ForgotPassword)
-	http.HandleFunc("POST /api/reset-password", controllers.ResetPassword)
-	
-	http.HandleFunc("GET /api/get/me", controllers.GetMe)
-	http.HandleFunc("GET /api/get/user/{username}", controllers.GetUserByID)
-	http.HandleFunc("GET /api/get/posts", controllers.GetUserPosts)
-	http.HandleFunc("GET /api/get/post/comments/{post_id}", controllers.GetPostComments)
+	// API routes
+	mux.HandleFunc("POST /api/register", controllers.Register)
+	mux.HandleFunc("POST /api/login", controllers.Login)
 
-	http.HandleFunc("GET /verify", controllers.VerifyEmail)
+	mux.HandleFunc("POST /api/create/post", controllers.CreatePost)
+	mux.HandleFunc("GET /api/delete/post/{post_id}", controllers.DeletePost)
+	mux.HandleFunc("POST /api/comment/post", controllers.CommentPost)
+	mux.HandleFunc("GET /api/like/post/{post_id}", controllers.LikePost)
 
-	http.ListenAndServe(":8080", nil)
+	mux.HandleFunc("PATCH /api/set/username", controllers.SetUsername)
+	mux.HandleFunc("PATCH /api/set/email", controllers.SetEmail)
+	mux.HandleFunc("PATCH /api/set/password", controllers.SetPassword)
+	mux.HandleFunc("PATCH /api/set/notifications", controllers.SetNotifications)
+	mux.HandleFunc("POST /api/forgot-password", controllers.ForgotPassword)
+	mux.HandleFunc("POST /api/reset-password", controllers.ResetPassword)
+
+	mux.HandleFunc("GET /api/get/me", controllers.GetMe)
+	mux.HandleFunc("GET /api/get/user/{username}", controllers.GetUserByID)
+	mux.HandleFunc("GET /api/get/posts", controllers.GetUserPosts)
+	mux.HandleFunc("GET /api/get/post/comments/{post_id}", controllers.GetPostComments)
+	mux.HandleFunc("GET /api/get/feed", controllers.GetFeed)
+
+	mux.HandleFunc("GET /verify", controllers.VerifyEmail)
+
+	// Static file serving for uploads and filters
+	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
+	mux.Handle("/filters/", http.StripPrefix("/filters/", http.FileServer(http.Dir("filters"))))
+
+	// Apply CORS middleware
+	handler := corsMiddleware(mux)
+
+	log.Println("Server starting on :8080")
+	http.ListenAndServe(":8080", handler)
 }

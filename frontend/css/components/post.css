@@ -1,0 +1,236 @@
+/* Post Card Component */
+.post-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.post-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.post-card__author {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.post-card__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background-color: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.post-card__username {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.post-card__username:hover {
+    color: var(--text-secondary);
+}
+
+.post-card__time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.post-card__image-wrapper {
+    position: relative;
+    aspect-ratio: 1;
+    background-color: var(--bg-primary);
+}
+
+.post-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-card__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.post-card__action {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--text-primary);
+    font-size: 14px;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.post-card__action:hover {
+    color: var(--text-secondary);
+}
+
+.post-card__action svg {
+    width: 24px;
+    height: 24px;
+}
+
+.post-card__like-btn--liked {
+    color: var(--error);
+}
+
+.post-card__like-btn--liked svg {
+    fill: var(--error);
+}
+
+.post-card__delete-btn:hover {
+    color: var(--error);
+}
+
+.post-card__content {
+    padding: 0 var(--spacing-md) var(--spacing-md);
+}
+
+.post-card__likes {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: var(--spacing-xs);
+}
+
+/* Grid Gallery */
+.post-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+}
+
+.post-grid__item {
+    position: relative;
+    aspect-ratio: 1;
+    background-color: var(--bg-secondary);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.post-grid__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-normal);
+}
+
+.post-grid__item:hover img {
+    transform: scale(1.05);
+}
+
+.post-grid__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.post-grid__item:hover .post-grid__overlay {
+    opacity: 1;
+}
+
+.post-grid__stat {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: white;
+    font-weight: 600;
+}
+
+.post-grid__stat svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
+@media (max-width: 768px) {
+    .post-grid {
+        gap: 2px;
+    }
+}
+
+/* Comments */
+.comment-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.comment-item {
+    padding: var(--spacing-sm) 0;
+}
+
+.comment-item__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.comment-item__username {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.comment-item__time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.comment-item__text {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.comment-form {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--border);
+}
+
+.comment-form input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.comment-form input:focus {
+    outline: none;
+}
+
+.comment-form button {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.comment-form button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}

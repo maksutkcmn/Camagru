@@ -7,17 +7,17 @@ services:
     container_name: camagru_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-1234}
-      MYSQL_DATABASE: ${DB_NAME:-camagru}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
     ports:
-      - "${DB_PORT:-3307}:3306"
+      - "${DB_PORT}:3306"
     volumes:
       - db_data:/var/lib/mysql
       - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     networks:
       - camagru_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER:-root}", "-p${DB_PASSWORD:-1234}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER}", "-p${DB_PASSWORD}"]
       timeout: 20s
       retries: 10
       interval: 5s
@@ -33,7 +33,7 @@ services:
       database:
         condition: service_healthy
     environment:
-      DB_DSN: ${DB_USER:-root}:${DB_PASSWORD:-1234}@tcp(database:3306)/${DB_NAME:-camagru}
+      DB_DSN: ${DB_USER}:${DB_PASSWORD}@tcp(database:3306)/${DB_NAME}
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       SMTP_FROM: ${SMTP_FROM}
@@ -48,22 +48,19 @@ services:
     networks:
       - camagru_network
 
-  # Frontend (Future - React/Vue/etc.)
-  # Uncomment when frontend is ready
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   container_name: camagru_frontend
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - backend
-  #   environment:
-  #     VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
-  #   ports:
-  #     - "${FRONTEND_PORT:-3000}:80"
-  #   networks:
-  #     - camagru_network
+  # Frontend (Vanilla JS)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: camagru_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    networks:
+      - camagru_network
 
 volumes:
   db_data:
