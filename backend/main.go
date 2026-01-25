@@ -52,6 +52,7 @@ func main() {
 	mux.HandleFunc("POST /api/create/post", controllers.CreatePost)
 	mux.HandleFunc("GET /api/delete/post/{post_id}", controllers.DeletePost)
 	mux.HandleFunc("POST /api/comment/post", controllers.CommentPost)
+	mux.HandleFunc("GET /api/delete/comment/{comment_id}", controllers.DeleteComment)
 	mux.HandleFunc("GET /api/like/post/{post_id}", controllers.LikePost)
 
 	mux.HandleFunc("PATCH /api/set/username", controllers.SetUsername)

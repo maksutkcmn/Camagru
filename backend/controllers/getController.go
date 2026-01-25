@@ -181,7 +181,13 @@ func GetPostComments(w http.ResponseWriter, r *http.Request)  {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	query := "SELECT id, user_id, comment, created_at FROM posts_comments WHERE post_id = ?"
+	query := `
+		SELECT c.id, c.user_id, u.username, c.comment, c.created_at
+		FROM posts_comments c
+		JOIN users u ON c.user_id = u.id
+		WHERE c.post_id = ?
+		ORDER BY c.created_at ASC
+	`
 	rows, err := globals.DB.QueryContext(ctx, query, postID)
 	if err != nil {
 		http.Error(w, "DB Error", http.StatusInternalServerError)
@@ -196,6 +202,7 @@ func GetPostComments(w http.ResponseWriter, r *http.Request)  {
 		if err := rows.Scan(
 			&comment.ID,
 			&comment.UserID,
+			&comment.Username,
 			&comment.Comment,
 			&comment.CreatedAt,
 		); err != nil {
@@ -225,7 +232,7 @@ func GetPostComments(w http.ResponseWriter, r *http.Request)  {
 }
 
 func GetFeed(w http.ResponseWriter, r *http.Request) {
-	_, err := services.GetUserIDFromRequest(r)
+	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
@@ -273,6 +280,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 			p.image_path,
 			(SELECT COUNT(*) FROM posts_likes WHERE post_id = p.id) as like_count,
 			(SELECT COUNT(*) FROM posts_comments WHERE post_id = p.id) as comment_count,
+			EXISTS(SELECT 1 FROM posts_likes WHERE post_id = p.id AND user_id = ?) as is_liked,
 			p.created_at
 		FROM posts p
 		JOIN users u ON p.user_id = u.id
@@ -280,7 +288,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		LIMIT ? OFFSET ?
 	`
 
-	rows, err := globals.DB.QueryContext(ctx, query, limit, offset)
+	rows, err := globals.DB.QueryContext(ctx, query, userID, limit, offset)
 	if err != nil {
 		http.Error(w, "DB Error", http.StatusInternalServerError)
 		return
@@ -298,6 +306,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 			&post.ImagePath,
 			&post.LikeCount,
 			&post.CommentCount,
+			&post.IsLiked,
 			&post.CreatedAt,
 		); err != nil {
 			http.Error(w, "DB Error", http.StatusInternalServerError)

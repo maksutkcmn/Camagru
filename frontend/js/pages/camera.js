@@ -43,8 +43,8 @@ export const cameraPage = {
                 <h1 class="camera-page__title">Create a Photo</h1>
 
                 <div class="camera-preview" id="camera-preview">
-                    <video id="camera-video" autoplay playsinline muted></video>
-                    <canvas id="camera-canvas"></canvas>
+                    <video id="camera-video" class="camera-preview__video" autoplay playsinline muted></video>
+                    <canvas id="camera-canvas" class="camera-preview__canvas"></canvas>
                 </div>
 
                 <div class="filters-section">
@@ -233,7 +233,9 @@ export const cameraPage = {
     showCameraError(message) {
         const preview = $('#camera-preview');
         if (preview) {
+            // Keep canvas hidden but available for file upload
             preview.innerHTML = `
+                <canvas id="camera-canvas" style="display: none;"></canvas>
                 <div class="camera-error">
                     <div class="camera-error__icon">
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -246,6 +248,11 @@ export const cameraPage = {
                     <p class="camera-error__message">You can still upload an image instead.</p>
                 </div>
             `;
+            // Initialize canvas for file upload after DOM update
+            const canvas = $('#camera-canvas');
+            if (canvas) {
+                Camera.initCanvasForUpload(canvas);
+            }
         }
     },
 

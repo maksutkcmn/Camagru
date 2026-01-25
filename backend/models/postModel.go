@@ -20,6 +20,7 @@ type PostDTO struct {
 type PostCommentsDTO struct {
 	ID			int		`json:"id"`
 	UserID		int		`json:"user_id"`
+	Username	string	`json:"username"`
 	Comment		string	`json:"comment"`
 	CreatedAt 	string 	`json:"created_at"`
 }
@@ -31,6 +32,7 @@ type FeedPostDTO struct {
 	ImagePath    string `json:"image_path"`
 	LikeCount    int    `json:"like_count"`
 	CommentCount int    `json:"comment_count"`
+	IsLiked      bool   `json:"is_liked"`
 	CreatedAt    string `json:"created_at"`
 }
 

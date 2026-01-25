@@ -332,37 +332,119 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	emailQuery := "SELECT username, email, notifications, is_verified FROM users WHERE id = ?"
-	var isVerified bool
-	var isNotifications bool
-	var toUsername string
-	var toEmail string
-	err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail, &isNotifications, &isVerified)
+	// Don't send email notification to yourself
+	if userID != toUserID {
+		emailQuery := "SELECT username, email, notifications, is_verified FROM users WHERE id = ?"
+		var isVerified bool
+		var isNotifications bool
+		var toUsername string
+		var toEmail string
+		err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail, &isNotifications, &isVerified)
 
-	if isVerified && isNotifications {
-		var fromUsername string
-		err = globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
-		
-		notifications := models.NotificationEmail{
-			ToUsername:   toUsername,
-			FromUserID:   int64(userID),
-			FromUsername: fromUsername,
-			EmailType:    message,
-		}
-		
-		if err = services.SendNotificationEmail(toEmail, notifications); err != nil {
-			http.Error(w, "Email not send", http.StatusInternalServerError)
-			return
+		if err == nil && isVerified && isNotifications {
+			var fromUsername string
+			globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
+
+			notifications := models.NotificationEmail{
+				ToUsername:   toUsername,
+				FromUserID:   int64(userID),
+				FromUsername: fromUsername,
+				EmailType:    message,
+			}
+
+			// Email failure should not block the like operation
+			services.SendNotificationEmail(toEmail, notifications)
 		}
 	}
 		
+	// Get updated like count
+	var newLikeCount int
+	countQuery := "SELECT COUNT(*) FROM posts_likes WHERE post_id = ?"
+	globals.DB.QueryRowContext(ctx, countQuery, postID).Scan(&newLikeCount)
+
 	jsonResponse := map[string]interface{}{
 		"success": true,
 		"message": "Beğeni bildirimi gönderildi",
 		"data": map[string]interface{}{
-			"post_id": postID,
-			"user_id": userID,
-			"action":  action,
+			"post_id":    postID,
+			"user_id":    userID,
+			"action":     action,
+			"like_count": newLikeCount,
+		},
+	}
+
+	responseBytes, err := json.Marshal(jsonResponse)
+	if err != nil {
+		http.Error(w, "JSON cant create", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseBytes)
+}
+
+func DeleteComment(w http.ResponseWriter, r *http.Request) {
+	userID, err := services.GetUserIDFromRequest(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	commentIDstr := r.PathValue("comment_id")
+	commentID, err := strconv.Atoi(commentIDstr)
+	if err != nil {
+		http.Error(w, "Invalid comment ID", http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	// Verify comment exists and belongs to user
+	checkQuery := "SELECT user_id FROM posts_comments WHERE id = ?"
+	var commentOwnerID int
+	err = globals.DB.QueryRowContext(ctx, checkQuery, commentID).Scan(&commentOwnerID)
+	if err != nil {
+		http.Error(w, "Comment not found", http.StatusNotFound)
+		return
+	}
+
+	if commentOwnerID != userID {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return
+	}
+
+	// Delete the comment
+	deleteQuery := "DELETE FROM posts_comments WHERE id = ? AND user_id = ?"
+	exec, err := globals.DB.PrepareContext(ctx, deleteQuery)
+	if err != nil {
+		http.Error(w, "DB Prepare Error", http.StatusInternalServerError)
+		return
+	}
+	defer exec.Close()
+
+	result, err := exec.ExecContext(ctx, commentID, userID)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			http.Error(w, "Timeout", http.StatusInternalServerError)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		http.Error(w, "Comment could not be deleted", http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse := map[string]interface{}{
+		"success": true,
+		"message": "Yorum silindi",
+		"data": map[string]interface{}{
+			"comment_id": commentID,
 		},
 	}
 

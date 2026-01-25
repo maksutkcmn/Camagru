@@ -1,5 +1,6 @@
 // Home/Feed Page
 import { postService } from '../services/post.service.js';
+import { store } from '../state/store.js';
 import { $, render, showLoading } from '../utils/dom.js';
 import { PostCard } from '../components/post-card.js';
 import { CONFIG } from '../config.js';
@@ -21,7 +22,7 @@ export const homePage = {
         const html = `
             <div class="home-page">
                 <div class="home-page__container">
-                    <div id="posts-container" class="gallery">
+                    <div id="posts-container" class="feed">
                         <!-- Posts will be loaded here -->
                     </div>
                     <div id="pagination" class="pagination hidden">
@@ -108,11 +109,30 @@ export const homePage = {
         emptyState.classList.add('hidden');
         container.classList.remove('hidden');
 
-        // Render grid items
-        container.innerHTML = this.posts.map(post => PostCard.renderGridItem(post)).join('');
+        const currentUser = store.getUser();
 
-        // Attach events
-        PostCard.attachEvents(container);
+        // Render feed items (Instagram-style vertical cards)
+        container.innerHTML = this.posts.map(post => {
+            const isOwnPost = currentUser && currentUser.user_id === post.user_id;
+            return PostCard.renderFeedItem(post, { showDelete: isOwnPost });
+        }).join('');
+
+        // Attach feed events
+        PostCard.attachFeedEvents(container, {
+            onDelete: (postId) => {
+                this.posts = this.posts.filter(p => p.id !== parseInt(postId));
+                if (this.posts.length === 0) {
+                    this.renderPosts();
+                }
+            },
+            onLike: (postId, data) => {
+                const post = this.posts.find(p => p.id === parseInt(postId));
+                if (post && data) {
+                    post.like_count = data.like_count !== undefined ? data.like_count : post.like_count;
+                    post.is_liked = data.action === 'liked';
+                }
+            }
+        });
 
         // Update pagination
         this.updatePagination();

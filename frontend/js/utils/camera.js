@@ -72,6 +72,7 @@ class CameraManager {
         const loadPromises = this.filters.map(filter => {
             return new Promise((resolve) => {
                 const img = new Image();
+                img.crossOrigin = 'anonymous'; // Enable CORS for canvas export
                 img.onload = () => {
                     this.filterImages.set(filter.name, img);
                     resolve();
@@ -89,10 +90,10 @@ class CameraManager {
         const draw = () => {
             if (!this.isRunning) return;
 
-            // Draw video frame (mirrored)
+            // Draw video frame (mirrored) - scale to fit canvas
             this.ctx.save();
             this.ctx.scale(-1, 1);
-            this.ctx.drawImage(this.video, -this.canvas.width, 0);
+            this.ctx.drawImage(this.video, -this.canvas.width, 0, this.canvas.width, this.canvas.height);
             this.ctx.restore();
 
             // Draw filter overlay
@@ -118,10 +119,10 @@ class CameraManager {
 
     // Capture frame
     capture() {
-        // Draw final frame
+        // Draw final frame (mirrored) - scale to fit canvas
         this.ctx.save();
         this.ctx.scale(-1, 1);
-        this.ctx.drawImage(this.video, -this.canvas.width, 0);
+        this.ctx.drawImage(this.video, -this.canvas.width, 0, this.canvas.width, this.canvas.height);
         this.ctx.restore();
 
         // Draw filter
@@ -138,8 +139,36 @@ class CameraManager {
         return this.canvas.toDataURL('image/png');
     }
 
+    // Initialize canvas for file upload (when camera is not available)
+    initCanvasForUpload(canvasElement) {
+        this.canvas = canvasElement;
+        this.ctx = canvasElement.getContext('2d');
+    }
+
+    // Ensure canvas is ready (for file upload without camera)
+    async ensureCanvasReady() {
+        if (!this.canvas || !this.ctx) {
+            const canvasEl = document.getElementById('camera-canvas');
+            if (canvasEl) {
+                this.canvas = canvasEl;
+                this.ctx = canvasEl.getContext('2d');
+            }
+        }
+        // Ensure filters are preloaded
+        if (this.filterImages.size === 0) {
+            await this.preloadFilters();
+        }
+    }
+
     // Load image from file
     async loadFromFile(file) {
+        // Ensure canvas is ready even without camera
+        await this.ensureCanvasReady();
+
+        if (!this.canvas || !this.ctx) {
+            throw new Error('Canvas not available');
+        }
+
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
@@ -189,7 +218,14 @@ class CameraManager {
     }
 
     // Redraw with new filter (for uploaded images)
-    redrawWithFilter(imageDataUrl) {
+    async redrawWithFilter(imageDataUrl) {
+        // Ensure canvas is ready
+        await this.ensureCanvasReady();
+
+        if (!this.canvas || !this.ctx) {
+            throw new Error('Canvas not available');
+        }
+
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => {
@@ -236,7 +272,7 @@ class CameraManager {
     }
 
     // Check if camera is supported
-    static isSupported() {
+    isSupported() {
         return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
     }
 }

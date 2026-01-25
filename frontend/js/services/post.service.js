@@ -37,6 +37,10 @@ export const postService = {
         return api.get(`/api/get/post/comments/${postId}`);
     },
 
+    async deleteComment(commentId) {
+        return api.get(`/api/delete/comment/${commentId}`);
+    },
+
     // Helper to get full image URL
     getImageUrl(imagePath) {
         if (!imagePath) return '';
