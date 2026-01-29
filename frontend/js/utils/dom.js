@@ -67,7 +67,10 @@ export function showLoading(container) {
 
 // Format date
 export function formatDate(dateString) {
-    const date = new Date(dateString);
+    // Convert MySQL datetime format to ISO 8601 UTC for proper parsing
+    // "2024-01-29 10:30:00" -> "2024-01-29T10:30:00Z" (Z marks it as UTC)
+    const isoString = dateString.replace(' ', 'T') + 'Z';
+    const date = new Date(isoString);
     const now = new Date();
     const diff = now - date;
 

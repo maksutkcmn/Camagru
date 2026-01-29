@@ -135,6 +135,34 @@
     fill: white;
 }
 
+.gallery__delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(239, 68, 68, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.gallery__delete-btn:hover {
+    background: rgba(220, 38, 38, 1);
+    transform: scale(1.1);
+}
+
+.gallery__delete-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: white;
+    fill: none;
+}
+
 @media (max-width: 768px) {
     .gallery {
         gap: 2px;

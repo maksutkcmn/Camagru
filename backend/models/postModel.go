@@ -11,10 +11,12 @@ type CreateComment struct {
 }
 
 type PostDTO struct {
-	ID			int		`json:"id"`
-	UserID		int		`json:"user_id"`
-	ImagePath 	string 	`json:"image_path"`
-	CreatedAt 	string 	`json:"created_at"`
+	ID           int    `json:"id"`
+	UserID       int    `json:"user_id"`
+	ImagePath    string `json:"image_path"`
+	LikeCount    int    `json:"like_count"`
+	CommentCount int    `json:"comment_count"`
+	CreatedAt    string `json:"created_at"`
 }
 
 type PostCommentsDTO struct {

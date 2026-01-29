@@ -109,7 +109,7 @@ export const profilePage = {
                     <div class="profile-content">
                         ${this.posts.length > 0 ? `
                             <div class="gallery" id="posts-grid">
-                                ${this.posts.map(post => PostCard.renderGridItem(post)).join('')}
+                                ${this.posts.map(post => PostCard.renderGridItem(post, { showDelete: true })).join('')}
                             </div>
                         ` : `
                             <div class="empty-state">

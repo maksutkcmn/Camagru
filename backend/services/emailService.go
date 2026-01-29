@@ -92,6 +92,12 @@ func generateNotificationBody(notification models.NotificationEmail) string {
 			<h2>Merhaba %s!</h2>
 			<p><strong>%s</strong> postunu beğendi.</p>
 		`, notification.ToUsername, notification.FromUsername)
+	
+	case models.EmailTypePostUnLiked:
+		content = fmt.Sprintf(`
+			<h2>Merhaba %s!</h2>
+			<p><strong>%s</strong> post beğenisini kaldırdı.</p>
+		`, notification.ToUsername, notification.FromUsername)
 
 	case models.EmailTypePostCommented:
 		content = fmt.Sprintf(`

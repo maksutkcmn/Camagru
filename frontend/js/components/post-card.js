@@ -285,7 +285,8 @@ export const PostCard = {
     },
 
     // Render for grid view (profile page)
-    renderGridItem(post) {
+    renderGridItem(post, options = {}) {
+        const { showDelete = false } = options;
         const imageUrl = postService.getImageUrl(post.image_path);
 
         return `
@@ -304,6 +305,14 @@ export const PostCard = {
                         </svg>
                         ${post.comment_count || 0}
                     </span>
+                    ${showDelete ? `
+                        <button class="gallery__delete-btn" data-post-id="${post.id}" aria-label="Delete post">
+                            <svg viewBox="0 0 24 24" fill="white" width="20" height="20">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -378,11 +387,40 @@ export const PostCard = {
             });
         });
 
-        // Grid items
+        // Grid items (click on image to view comments)
         container.querySelectorAll('.gallery__item').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', (e) => {
+                // Don't open modal if clicking delete button
+                if (e.target.closest('.gallery__delete-btn')) return;
                 const postId = item.dataset.postId;
                 this.showCommentsModal(postId);
+            });
+        });
+
+        // Grid delete buttons
+        container.querySelectorAll('.gallery__delete-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const postId = btn.dataset.postId;
+
+                const confirmed = await Modal.confirm('Are you sure you want to delete this post?', {
+                    title: 'Delete Post',
+                    confirmText: 'Delete',
+                    cancelText: 'Cancel'
+                });
+
+                if (confirmed) {
+                    try {
+                        await postService.deletePost(postId);
+                        const galleryItem = btn.closest('.gallery__item');
+                        if (galleryItem) galleryItem.remove();
+                        if (onDelete) onDelete(postId);
+                    } catch (error) {
+                        console.error('Delete failed:', error);
+                        Modal.alert('Failed to delete post. Please try again.');
+                    }
+                }
             });
         });
     }

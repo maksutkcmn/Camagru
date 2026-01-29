@@ -117,7 +117,18 @@ func GetUserPosts(w http.ResponseWriter, r *http.Request)  {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	query := "SELECT id, user_id, image_path, created_at FROM posts WHERE user_id = ?"
+	query := `
+		SELECT
+			p.id,
+			p.user_id,
+			p.image_path,
+			(SELECT COUNT(*) FROM posts_likes WHERE post_id = p.id) as like_count,
+			(SELECT COUNT(*) FROM posts_comments WHERE post_id = p.id) as comment_count,
+			p.created_at
+		FROM posts p
+		WHERE p.user_id = ?
+		ORDER BY p.created_at DESC
+	`
 	rows, err := globals.DB.QueryContext(ctx, query, userID)
 	if err != nil {
 		http.Error(w, "DB Error", http.StatusInternalServerError)
@@ -133,6 +144,8 @@ func GetUserPosts(w http.ResponseWriter, r *http.Request)  {
 			&post.ID,
 			&post.UserID,
 			&post.ImagePath,
+			&post.LikeCount,
+			&post.CommentCount,
 			&post.CreatedAt,
 		); err != nil {
 			http.Error(w, "DB Error", http.StatusInternalServerError)
