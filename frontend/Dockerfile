@@ -6,6 +6,7 @@ WORKDIR /var/www
 
 # Copy static files
 COPY index.html .
+COPY favicon.svg .
 COPY css/ ./css/
 COPY js/ ./js/
 COPY assets/ ./assets/

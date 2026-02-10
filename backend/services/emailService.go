@@ -125,16 +125,33 @@ func SendResetEmail(toEmail, token string) error {
 	password := os.Getenv("SMTP_PASSWORD")
 	smtpHost := os.Getenv("SMTP_HOST")
 	smtpPort := os.Getenv("SMTP_PORT")
+	frontendURL := os.Getenv("FRONTEND_URL")
 
-	link := fmt.Sprintf("http://localhost:8080/reset-password?token=%s", token)
-    
-    subject := "Şifre Sıfırlama Talebi\n"
-    mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-    body := fmt.Sprintf("<html><body><h3>Şifreni sıfırlamak için tıkla:</h3><a href=\"%s\">Şifremi Sıfırla</a></body></html>", link)
-    
-    msg := []byte(subject + mime + body)
+	link := fmt.Sprintf("%s/#/reset-password?token=%s", frontendURL, token)
 
-    auth := smtp.PlainAuth("", from, password, smtpHost)
-    err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{toEmail}, msg)
-    return err
+	headers := make(map[string]string)
+	headers["From"] = from
+	headers["To"] = toEmail
+	headers["Subject"] = "Camagru Sifre Sifirlama"
+	headers["MIME-Version"] = "1.0"
+	headers["Content-Type"] = "text/html; charset=\"UTF-8\""
+
+	message := ""
+	for k, v := range headers {
+		message += fmt.Sprintf("%s: %s\r\n", k, v)
+	}
+
+	body := fmt.Sprintf(`
+		<html>
+			<body>
+				<h3>Sifreni sifirlamak icin tikla:</h3>
+				<a href="%s">Sifremi Sifirla</a>
+			</body>
+		</html>
+	`, link)
+
+	fullMessage := []byte(message + "\r\n" + body)
+
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+	return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{toEmail}, fullMessage)
 }

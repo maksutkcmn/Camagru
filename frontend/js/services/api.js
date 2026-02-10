@@ -28,11 +28,14 @@ class ApiService {
                 headers
             });
 
-            // Handle 401 Unauthorized (skip for auth endpoints)
+            // Handle 401 Unauthorized (skip for auth and session-check endpoints)
             const isAuthEndpoint = endpoint.includes('/login') || endpoint.includes('/register');
+            const isSessionCheck = endpoint.includes('/get/me');
             if (response.status === 401 && !isAuthEndpoint) {
                 store.clearAuth();
-                router.navigate('/login');
+                if (!isSessionCheck) {
+                    router.navigate('/login');
+                }
                 throw new Error('Session expired. Please login again.');
             }
 
