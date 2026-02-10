@@ -1,4 +1,3 @@
-// Settings Page
 import { userService } from '../services/user.service.js';
 import { authService } from '../services/auth.service.js';
 import { store } from '../state/store.js';
@@ -47,7 +46,6 @@ export const settingsPage = {
 
                 <div id="success-message" class="settings-success hidden"></div>
 
-                <!-- Username Section -->
                 <div class="settings-section">
                     <div class="settings-section__header">
                         <h2 class="settings-section__title">Username</h2>
@@ -73,7 +71,6 @@ export const settingsPage = {
                     </div>
                 </div>
 
-                <!-- Email Section -->
                 <div class="settings-section">
                     <div class="settings-section__header">
                         <h2 class="settings-section__title">Email</h2>
@@ -100,7 +97,6 @@ export const settingsPage = {
                     </div>
                 </div>
 
-                <!-- Password Section -->
                 <div class="settings-section">
                     <div class="settings-section__header">
                         <h2 class="settings-section__title">Password</h2>
@@ -145,7 +141,6 @@ export const settingsPage = {
                     </div>
                 </div>
 
-                <!-- Notifications Section -->
                 <div class="settings-section">
                     <div class="settings-section__header">
                         <h2 class="settings-section__title">Notifications</h2>
@@ -166,7 +161,6 @@ export const settingsPage = {
                     </div>
                 </div>
 
-                <!-- Logout Section -->
                 <div class="settings-section settings-danger">
                     <div class="settings-section__header">
                         <h2 class="settings-section__title">Account</h2>
@@ -186,7 +180,6 @@ export const settingsPage = {
     },
 
     attachEvents() {
-        // Username form
         const usernameForm = $('#username-form');
         if (usernameForm) {
             usernameForm.addEventListener('submit', (e) => {
@@ -195,7 +188,6 @@ export const settingsPage = {
             });
         }
 
-        // Email form
         const emailForm = $('#email-form');
         if (emailForm) {
             emailForm.addEventListener('submit', (e) => {
@@ -204,7 +196,6 @@ export const settingsPage = {
             });
         }
 
-        // Password form
         const passwordForm = $('#password-form');
         if (passwordForm) {
             passwordForm.addEventListener('submit', (e) => {
@@ -213,7 +204,6 @@ export const settingsPage = {
             });
         }
 
-        // Notifications toggle
         const notificationsToggle = $('#notifications-toggle');
         if (notificationsToggle) {
             notificationsToggle.addEventListener('change', () => {
@@ -221,7 +211,6 @@ export const settingsPage = {
             });
         }
 
-        // Logout button
         const logoutBtn = $('#logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
@@ -357,7 +346,6 @@ export const settingsPage = {
             this.user.notifications = toggle.checked;
             this.showSuccess(`Notifications ${toggle.checked ? 'enabled' : 'disabled'}`);
         } catch (error) {
-            // Revert toggle
             toggle.checked = !toggle.checked;
             Modal.alert('Failed to update notifications. Please try again.');
         }
@@ -369,14 +357,9 @@ export const settingsPage = {
             successEl.textContent = message;
             successEl.classList.remove('hidden');
 
-            // Hide after 3 seconds
             setTimeout(() => {
                 successEl.classList.add('hidden');
             }, 3000);
         }
-    },
-
-    destroy() {
-        // Cleanup if needed
     }
 };

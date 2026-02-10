@@ -1,4 +1,3 @@
-// Post Service
 import { api } from './api.js';
 import { CONFIG } from '../config.js';
 
@@ -41,7 +40,6 @@ export const postService = {
         return api.get(`/api/delete/comment/${commentId}`);
     },
 
-    // Helper to get full image URL
     getImageUrl(imagePath) {
         if (!imagePath) return '';
         if (imagePath.startsWith('http')) return imagePath;

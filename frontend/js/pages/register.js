@@ -1,4 +1,3 @@
-// Register Page
 import { authService } from '../services/auth.service.js';
 import { router } from '../router/router.js';
 import { $, render } from '../utils/dom.js';
@@ -104,10 +103,8 @@ export const registerPage = {
         const password = form.password.value;
         const confirmPassword = form.confirmPassword.value;
 
-        // Clear previous errors
         clearFormErrors(form);
 
-        // Validate
         const { isValid, errors } = validateForm(
             { email, username, password, confirmPassword },
             {
@@ -125,7 +122,6 @@ export const registerPage = {
             return;
         }
 
-        // Submit
         const submitBtn = $('#submit-btn');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Creating account...';
@@ -163,9 +159,5 @@ export const registerPage = {
         `;
 
         render('#app', html);
-    },
-
-    destroy() {
-        // Cleanup if needed
     }
 };

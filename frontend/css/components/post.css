@@ -1,4 +1,3 @@
-/* Post Card Component */
 .post-card {
     background-color: var(--bg-card);
     border: 1px solid var(--border);
@@ -108,7 +107,6 @@
     margin-bottom: var(--spacing-xs);
 }
 
-/* Grid Gallery */
 .post-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -173,7 +171,6 @@
     }
 }
 
-/* Comments */
 .comment-list {
     max-height: 300px;
     overflow-y: auto;
@@ -235,9 +232,6 @@
     cursor: not-allowed;
 }
 
-/* =============================================
-   Feed Card (Instagram-style vertical)
-   ============================================= */
 .feed-card {
     background-color: var(--bg-card);
     border: 1px solid var(--border);
@@ -388,7 +382,6 @@
     letter-spacing: 0.2px;
 }
 
-/* Comment item delete button */
 .comment-item {
     position: relative;
 }
@@ -427,7 +420,6 @@
     color: var(--error);
 }
 
-/* Comment form improvements */
 .comment-form {
     display: flex;
     gap: var(--spacing-sm);
@@ -451,7 +443,6 @@
     border-color: var(--accent);
 }
 
-/* Comment list improvements */
 .comment-list {
     max-height: 400px;
     overflow-y: auto;

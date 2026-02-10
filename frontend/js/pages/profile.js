@@ -1,4 +1,3 @@
-// Profile Page
 import { userService } from '../services/user.service.js';
 import { postService } from '../services/post.service.js';
 import { store } from '../state/store.js';
@@ -37,7 +36,6 @@ export const profilePage = {
 
     async loadProfile() {
         try {
-            // Load user data
             const userResponse = await userService.getUser(this.username);
 
             if (!userResponse.success || !userResponse.data) {
@@ -47,7 +45,6 @@ export const profilePage = {
 
             this.user = userResponse.data;
 
-            // Load user posts if own profile
             if (this.isOwnProfile) {
                 const postsResponse = await postService.getUserPosts();
                 this.posts = postsResponse.data?.posts || [];
@@ -172,9 +169,5 @@ export const profilePage = {
             month: 'long',
             year: 'numeric'
         });
-    },
-
-    destroy() {
-        // Cleanup if needed
     }
 };

@@ -1,5 +1,3 @@
-// Form Validation Utilities
-
 export const validators = {
     required: (value) => {
         if (!value || value.trim() === '') {
@@ -65,7 +63,6 @@ export const validators = {
     }
 };
 
-// Validate a single field
 export function validateField(value, rules = []) {
     for (const rule of rules) {
         const error = rule(value);
@@ -76,7 +73,6 @@ export function validateField(value, rules = []) {
     return null;
 }
 
-// Validate entire form
 export function validateForm(formData, validationRules) {
     const errors = {};
     let isValid = true;
@@ -93,7 +89,6 @@ export function validateForm(formData, validationRules) {
     return { isValid, errors };
 }
 
-// Show field error in UI
 export function showFieldError(fieldName, message) {
     const input = document.getElementById(fieldName);
     const errorEl = document.getElementById(`${fieldName}-error`);
@@ -106,7 +101,6 @@ export function showFieldError(fieldName, message) {
     }
 }
 
-// Clear field error in UI
 export function clearFieldError(fieldName) {
     const input = document.getElementById(fieldName);
     const errorEl = document.getElementById(`${fieldName}-error`);
@@ -119,7 +113,6 @@ export function clearFieldError(fieldName) {
     }
 }
 
-// Clear all form errors
 export function clearFormErrors(form) {
     form.querySelectorAll('.input--error').forEach(el => {
         el.classList.remove('input--error');
@@ -134,7 +127,6 @@ export function clearFormErrors(form) {
     }
 }
 
-// Show form-level error
 export function showFormError(form, message) {
     const errorDiv = form.querySelector('#form-error');
     if (errorDiv) {

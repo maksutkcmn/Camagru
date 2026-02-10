@@ -1,4 +1,3 @@
-/* Auth Pages (Login, Register, Forgot Password, Reset Password) */
 .auth-page {
     min-height: calc(100vh - var(--navbar-height));
     display: flex;
@@ -15,7 +14,6 @@
     margin-top: var(--spacing-md);
 }
 
-/* Verify Email Page */
 .verify-page {
     min-height: calc(100vh - var(--navbar-height));
     display: flex;
@@ -51,7 +49,6 @@
     margin-bottom: var(--spacing-lg);
 }
 
-/* Password Reset Pages */
 .reset-password-page {
     min-height: calc(100vh - var(--navbar-height));
     display: flex;
@@ -83,7 +80,6 @@
     font-size: 14px;
 }
 
-/* Success/Error States */
 .auth-success {
     text-align: center;
     padding: var(--spacing-xl);

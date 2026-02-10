@@ -35,9 +35,9 @@ func (e EmailType) Subject() string {
 }
 
 type NotificationEmail struct {
-	ToUsername   string    // Kime gönderilecek
-	FromUserID   int64     // Kim gönderdi (aksiyonu yapan)
-	FromUsername string    // Aksiyonu yapan kullanıcı adı
-	EmailType    EmailType // Email tipi
-	PostID       int64     // İlgili post ID'si (opsiyonel)
+	ToUsername   string
+	FromUserID   int64
+	FromUsername string
+	EmailType    EmailType
+	PostID       int64
 }

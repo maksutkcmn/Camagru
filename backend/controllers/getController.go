@@ -251,7 +251,6 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse query parameters
 	pageStr := r.URL.Query().Get("page")
 	limitStr := r.URL.Query().Get("limit")
 
@@ -275,7 +274,6 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	// Get total count
 	var totalPosts int
 	countQuery := "SELECT COUNT(*) FROM posts"
 	err = globals.DB.QueryRowContext(ctx, countQuery).Scan(&totalPosts)
@@ -284,7 +282,6 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get posts with user info and counts
 	query := `
 		SELECT
 			p.id,
@@ -333,7 +330,6 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Calculate pagination info
 	totalPages := (totalPosts + limit - 1) / limit
 	if totalPages == 0 {
 		totalPages = 1

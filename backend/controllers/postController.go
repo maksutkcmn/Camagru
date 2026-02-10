@@ -332,7 +332,6 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	// Don't send email notification to yourself
 	if userID != toUserID {
 		emailQuery := "SELECT username, email, notifications, is_verified FROM users WHERE id = ?"
 		var isVerified bool
@@ -352,12 +351,10 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 				EmailType:    message,
 			}
 
-			// Email failure should not block the like operation
 			services.SendNotificationEmail(toEmail, notifications)
 		}
 	}
 		
-	// Get updated like count
 	var newLikeCount int
 	countQuery := "SELECT COUNT(*) FROM posts_likes WHERE post_id = ?"
 	globals.DB.QueryRowContext(ctx, countQuery, postID).Scan(&newLikeCount)
@@ -401,7 +398,6 @@ func DeleteComment(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	// Verify comment exists and belongs to user
 	checkQuery := "SELECT user_id FROM posts_comments WHERE id = ?"
 	var commentOwnerID int
 	err = globals.DB.QueryRowContext(ctx, checkQuery, commentID).Scan(&commentOwnerID)
@@ -415,7 +411,6 @@ func DeleteComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Delete the comment
 	deleteQuery := "DELETE FROM posts_comments WHERE id = ? AND user_id = ?"
 	exec, err := globals.DB.PrepareContext(ctx, deleteQuery)
 	if err != nil {

@@ -1,8 +1,6 @@
-// Modal Component
 import { $ } from '../utils/dom.js';
 
 export const Modal = {
-    // Show a modal with custom content
     show(content, options = {}) {
         const { title = '', onClose, size = 'normal' } = options;
 
@@ -41,7 +39,6 @@ export const Modal = {
             if (e.target === overlay) close();
         });
 
-        // Close on Escape key
         const handleEscape = (e) => {
             if (e.key === 'Escape') {
                 close();
@@ -53,7 +50,6 @@ export const Modal = {
         return { close, element: overlay };
     },
 
-    // Show a confirmation dialog
     confirm(message, options = {}) {
         const { title = 'Confirm', confirmText = 'Confirm', cancelText = 'Cancel' } = options;
 
@@ -80,7 +76,6 @@ export const Modal = {
         });
     },
 
-    // Show an alert dialog
     alert(message, options = {}) {
         const { title = 'Alert', buttonText = 'OK' } = options;
 
@@ -101,7 +96,6 @@ export const Modal = {
         });
     },
 
-    // Close all modals
     closeAll() {
         document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
         document.body.style.overflow = '';

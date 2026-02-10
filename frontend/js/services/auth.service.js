@@ -1,4 +1,3 @@
-// Authentication Service
 import { api } from './api.js';
 import { store } from '../state/store.js';
 

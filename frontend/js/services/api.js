@@ -1,4 +1,3 @@
-// Base API Service
 import { CONFIG } from '../config.js';
 import { store } from '../state/store.js';
 import { router } from '../router/router.js';
@@ -16,7 +15,6 @@ class ApiService {
             ...options.headers
         };
 
-        // Attach JWT token if available
         const token = store.getToken();
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
@@ -28,7 +26,6 @@ class ApiService {
                 headers
             });
 
-            // Handle 401 Unauthorized (skip for auth and session-check endpoints)
             const isAuthEndpoint = endpoint.includes('/login') || endpoint.includes('/register');
             const isSessionCheck = endpoint.includes('/get/me');
             if (response.status === 401 && !isAuthEndpoint) {
@@ -39,7 +36,6 @@ class ApiService {
                 throw new Error('Session expired. Please login again.');
             }
 
-            // Parse response
             const contentType = response.headers.get('content-type');
             let data;
 

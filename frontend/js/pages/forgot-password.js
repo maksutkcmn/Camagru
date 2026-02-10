@@ -1,4 +1,3 @@
-// Forgot Password Page
 import { authService } from '../services/auth.service.js';
 import { $, render } from '../utils/dom.js';
 import { validators, validateForm, showFieldError, clearFormErrors, showFormError } from '../utils/validation.js';
@@ -62,10 +61,8 @@ export const forgotPasswordPage = {
     async handleSubmit(form) {
         const email = form.email.value.trim();
 
-        // Clear previous errors
         clearFormErrors(form);
 
-        // Validate
         const { isValid, errors } = validateForm(
             { email },
             {
@@ -80,7 +77,6 @@ export const forgotPasswordPage = {
             return;
         }
 
-        // Submit
         const submitBtn = $('#submit-btn');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending...';
@@ -118,9 +114,5 @@ export const forgotPasswordPage = {
         `;
 
         render('#app', html);
-    },
-
-    destroy() {
-        // Cleanup if needed
     }
 };

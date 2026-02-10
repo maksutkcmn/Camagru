@@ -1,4 +1,3 @@
-// Simple State Management Store
 import { CONFIG } from '../config.js';
 
 class Store {
@@ -12,17 +11,14 @@ class Store {
         this.listeners = new Map();
     }
 
-    // Get current state
     getState() {
         return { ...this.state };
     }
 
-    // Update state and notify listeners
     setState(updates) {
         const prevState = { ...this.state };
         this.state = { ...this.state, ...updates };
 
-        // Notify subscribers of changed keys
         Object.keys(updates).forEach(key => {
             if (this.listeners.has(key)) {
                 this.listeners.get(key).forEach(callback => {
@@ -32,18 +28,15 @@ class Store {
         });
     }
 
-    // Subscribe to state changes
     subscribe(key, callback) {
         if (!this.listeners.has(key)) {
             this.listeners.set(key, new Set());
         }
         this.listeners.get(key).add(callback);
 
-        // Return unsubscribe function
         return () => this.listeners.get(key).delete(callback);
     }
 
-    // Authentication helpers
     isAuthenticated() {
         return !!this.state.token;
     }
@@ -75,7 +68,6 @@ class Store {
         this.setState({ user });
     }
 
-    // Try to restore user from localStorage
     restoreUser() {
         const userJson = localStorage.getItem(CONFIG.USER_STORAGE_KEY);
         if (userJson) {
@@ -90,7 +82,6 @@ class Store {
         return null;
     }
 
-    // Loading state helpers
     setLoading(isLoading) {
         this.setState({ isLoading });
     }
@@ -99,7 +90,6 @@ class Store {
         return this.state.isLoading;
     }
 
-    // Error state helpers
     setError(error) {
         this.setState({ error });
     }

@@ -1,4 +1,3 @@
-// Camera/Create Page
 import { Camera } from '../utils/camera.js';
 import { postService } from '../services/post.service.js';
 import { router } from '../router/router.js';
@@ -9,7 +8,7 @@ import { CONFIG } from '../config.js';
 export const cameraPage = {
     capturedImage: null,
     uploadedImage: null,
-    mode: 'camera', // 'camera' or 'upload'
+    mode: 'camera',
 
     async init() {
         this.capturedImage = null;
@@ -19,13 +18,11 @@ export const cameraPage = {
         this.render();
         this.attachEvents();
 
-        // Check camera support
         if (!Camera.isSupported()) {
             this.showCameraError('Your browser does not support camera access.');
             return;
         }
 
-        // Initialize camera
         try {
             const video = $('#camera-video');
             const canvas = $('#camera-canvas');
@@ -104,7 +101,6 @@ export const cameraPage = {
     },
 
     attachEvents() {
-        // Filter selection
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-btn').forEach(b =>
@@ -113,32 +109,27 @@ export const cameraPage = {
                 e.currentTarget.classList.add('filter-btn--active');
                 Camera.setFilter(e.currentTarget.dataset.filter || null);
 
-                // If we have an uploaded image, redraw with new filter
                 if (this.uploadedImage) {
                     this.redrawUploadedImage();
                 }
             });
         });
 
-        // Capture button
         const captureBtn = $('#capture-btn');
         if (captureBtn) {
             captureBtn.addEventListener('click', () => this.capturePhoto());
         }
 
-        // File upload
         const fileInput = $('#file-input');
         if (fileInput) {
             fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
         }
 
-        // Retake button
         const retakeBtn = $('#retake-btn');
         if (retakeBtn) {
             retakeBtn.addEventListener('click', () => this.retake());
         }
 
-        // Post button
         const postBtn = $('#post-btn');
         if (postBtn) {
             postBtn.addEventListener('click', () => this.submitPost());
@@ -201,7 +192,6 @@ export const cameraPage = {
             capturedSection.classList.add('hidden');
         }
 
-        // Reset file input
         const fileInput = $('#file-input');
         if (fileInput) {
             fileInput.value = '';
@@ -233,7 +223,6 @@ export const cameraPage = {
     showCameraError(message) {
         const preview = $('#camera-preview');
         if (preview) {
-            // Keep canvas hidden but available for file upload
             preview.innerHTML = `
                 <canvas id="camera-canvas" style="display: none;"></canvas>
                 <div class="camera-error">
@@ -248,7 +237,6 @@ export const cameraPage = {
                     <p class="camera-error__message">You can still upload an image instead.</p>
                 </div>
             `;
-            // Initialize canvas for file upload after DOM update
             const canvas = $('#camera-canvas');
             if (canvas) {
                 Camera.initCanvasForUpload(canvas);

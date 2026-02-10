@@ -1,4 +1,3 @@
-// Login Page
 import { authService } from '../services/auth.service.js';
 import { router } from '../router/router.js';
 import { $, render } from '../utils/dom.js';
@@ -81,10 +80,8 @@ export const loginPage = {
         const username = form.username.value.trim();
         const password = form.password.value;
 
-        // Clear previous errors
         clearFormErrors(form);
 
-        // Validate
         const { isValid, errors } = validateForm(
             { username, password },
             {
@@ -100,7 +97,6 @@ export const loginPage = {
             return;
         }
 
-        // Submit
         const submitBtn = $('#submit-btn');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Logging in...';
@@ -113,9 +109,5 @@ export const loginPage = {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Log In';
         }
-    },
-
-    destroy() {
-        // Cleanup if needed
     }
 };

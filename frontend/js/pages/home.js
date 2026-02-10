@@ -1,4 +1,3 @@
-// Home/Feed Page
 import { postService } from '../services/post.service.js';
 import { store } from '../state/store.js';
 import { $, render, showLoading } from '../utils/dom.js';
@@ -23,7 +22,6 @@ export const homePage = {
             <div class="home-page">
                 <div class="home-page__container">
                     <div id="posts-container" class="feed">
-                        <!-- Posts will be loaded here -->
                     </div>
                     <div id="pagination" class="pagination hidden">
                         <button id="prev-btn" class="pagination__btn" disabled>Previous</button>
@@ -111,13 +109,11 @@ export const homePage = {
 
         const currentUser = store.getUser();
 
-        // Render feed items (Instagram-style vertical cards)
         container.innerHTML = this.posts.map(post => {
             const isOwnPost = currentUser && currentUser.user_id === post.user_id;
             return PostCard.renderFeedItem(post, { showDelete: isOwnPost });
         }).join('');
 
-        // Attach feed events
         PostCard.attachFeedEvents(container, {
             onDelete: (postId) => {
                 this.posts = this.posts.filter(p => p.id !== parseInt(postId));
@@ -134,7 +130,6 @@ export const homePage = {
             }
         });
 
-        // Update pagination
         this.updatePagination();
     },
 
@@ -161,11 +156,6 @@ export const homePage = {
         this.currentPage = page;
         await this.loadPosts();
 
-        // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    },
-
-    destroy() {
-        // Cleanup if needed
     }
 };

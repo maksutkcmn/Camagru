@@ -1,11 +1,9 @@
-// Post Card Component
 import { postService } from '../services/post.service.js';
 import { store } from '../state/store.js';
 import { formatDate, escapeHtml } from '../utils/dom.js';
 import { Modal } from './modal.js';
 
 export const PostCard = {
-    // Render Instagram-style feed card
     renderFeedItem(post, options = {}) {
         const { showDelete = false } = options;
         const imageUrl = postService.getImageUrl(post.image_path);
@@ -65,11 +63,9 @@ export const PostCard = {
         `;
     },
 
-    // Attach events for feed items
     attachFeedEvents(container, options = {}) {
         const { onDelete, onLike } = options;
 
-        // Like buttons
         container.querySelectorAll('.feed-card__like-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -88,7 +84,6 @@ export const PostCard = {
                             svg.setAttribute('fill', 'none');
                         }
 
-                        // Update like count
                         const card = btn.closest('.feed-card');
                         const likesDiv = card.querySelector('.feed-card__likes');
                         if (likesDiv && response.data?.like_count !== undefined) {
@@ -103,7 +98,6 @@ export const PostCard = {
             });
         });
 
-        // Comment buttons and "View all comments"
         container.querySelectorAll('.feed-card__comment-btn, .feed-card__view-comments').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -112,7 +106,6 @@ export const PostCard = {
             });
         });
 
-        // Delete buttons
         container.querySelectorAll('.feed-card__delete-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -139,7 +132,6 @@ export const PostCard = {
         });
     },
 
-    // Show comments modal with delete functionality
     async showCommentsModal(postId) {
         try {
             const response = await postService.getComments(postId);
@@ -181,7 +173,6 @@ export const PostCard = {
 
             const modal = Modal.show(content, { title: 'Comments', size: 'large' });
 
-            // Handle comment form submission
             const form = modal.element.querySelector('#comment-form');
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -199,7 +190,6 @@ export const PostCard = {
                 }
             });
 
-            // Handle comment deletion
             modal.element.querySelectorAll('.comment-item__delete').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     e.preventDefault();
@@ -210,7 +200,6 @@ export const PostCard = {
                         const commentItem = btn.closest('.comment-item');
                         if (commentItem) commentItem.remove();
 
-                        // Check if no comments left
                         const commentList = modal.element.querySelector('#comment-list');
                         if (!commentList.querySelector('.comment-item')) {
                             commentList.innerHTML = '<p class="text-muted text-center">No comments yet</p>';
@@ -228,7 +217,6 @@ export const PostCard = {
         }
     },
 
-    // Render a post card (for feed view) - legacy
     render(post, options = {}) {
         const { showDelete = false } = options;
         const imageUrl = postService.getImageUrl(post.image_path);
@@ -284,7 +272,6 @@ export const PostCard = {
         `;
     },
 
-    // Render for grid view (profile page)
     renderGridItem(post, options = {}) {
         const { showDelete = false } = options;
         const imageUrl = postService.getImageUrl(post.image_path);
@@ -318,11 +305,9 @@ export const PostCard = {
         `;
     },
 
-    // Attach event listeners (for grid items and legacy post cards)
     attachEvents(container, options = {}) {
         const { onDelete, onLike } = options;
 
-        // Like buttons
         container.querySelectorAll('.post-card__like-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -339,7 +324,6 @@ export const PostCard = {
                             btn.classList.remove('post-card__like-btn--liked');
                         }
 
-                        // Update count
                         if (countSpan && response.data?.like_count !== undefined) {
                             countSpan.textContent = response.data.like_count;
                         }
@@ -352,7 +336,6 @@ export const PostCard = {
             });
         });
 
-        // Comment buttons
         container.querySelectorAll('.post-card__comment-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -361,7 +344,6 @@ export const PostCard = {
             });
         });
 
-        // Delete buttons
         container.querySelectorAll('.post-card__delete-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -387,17 +369,14 @@ export const PostCard = {
             });
         });
 
-        // Grid items (click on image to view comments)
         container.querySelectorAll('.gallery__item').forEach(item => {
             item.addEventListener('click', (e) => {
-                // Don't open modal if clicking delete button
                 if (e.target.closest('.gallery__delete-btn')) return;
                 const postId = item.dataset.postId;
                 this.showCommentsModal(postId);
             });
         });
 
-        // Grid delete buttons
         container.querySelectorAll('.gallery__delete-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();

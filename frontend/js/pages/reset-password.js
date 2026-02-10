@@ -1,4 +1,3 @@
-// Reset Password Page
 import { authService } from '../services/auth.service.js';
 import { router } from '../router/router.js';
 import { $, render } from '../utils/dom.js';
@@ -82,10 +81,8 @@ export const resetPasswordPage = {
         const password = form.password.value;
         const confirmPassword = form.confirmPassword.value;
 
-        // Clear previous errors
         clearFormErrors(form);
 
-        // Validate
         const { isValid, errors } = validateForm(
             { password, confirmPassword },
             {
@@ -101,7 +98,6 @@ export const resetPasswordPage = {
             return;
         }
 
-        // Submit
         const submitBtn = $('#submit-btn');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Resetting...';
@@ -162,9 +158,5 @@ export const resetPasswordPage = {
         `;
 
         render('#app', html);
-    },
-
-    destroy() {
-        // Cleanup if needed
     }
 };

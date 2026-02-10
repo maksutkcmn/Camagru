@@ -1,4 +1,3 @@
-// Email Verification Page
 import { $, render } from '../utils/dom.js';
 import { CONFIG } from '../config.js';
 
@@ -77,9 +76,5 @@ export const verifyEmailPage = {
         `;
 
         render('#app', html);
-    },
-
-    destroy() {
-        // Cleanup if needed
     }
 };

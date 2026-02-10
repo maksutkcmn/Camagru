@@ -1,4 +1,3 @@
-// Navbar Component
 import { store } from '../state/store.js';
 import { authService } from '../services/auth.service.js';
 import { router } from '../router/router.js';
@@ -66,7 +65,6 @@ export const Navbar = {
     },
 
     attachEvents() {
-        // Logout button
         const logoutBtn = $('.navbar__logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
@@ -76,7 +74,6 @@ export const Navbar = {
             });
         }
 
-        // Mobile toggle
         const mobileToggle = $('.navbar__mobile-toggle');
         const navLinks = $('.navbar__links');
         if (mobileToggle && navLinks) {
@@ -84,7 +81,6 @@ export const Navbar = {
                 navLinks.classList.toggle('navbar__links--open');
             });
 
-            // Close mobile menu when clicking a link
             navLinks.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', () => {
                     navLinks.classList.remove('navbar__links--open');
@@ -104,7 +100,6 @@ export const Navbar = {
     init() {
         this.update();
 
-        // Subscribe to auth changes
         store.subscribe('token', () => this.update());
         store.subscribe('user', () => this.update());
     }

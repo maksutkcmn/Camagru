@@ -1,4 +1,3 @@
-// Hash-based SPA Router
 import { store } from '../state/store.js';
 
 class Router {
@@ -8,12 +7,10 @@ class Router {
         this.params = {};
     }
 
-    // Register a route
     register(path, pageModule, options = {}) {
         this.routes.set(path, { pageModule, ...options });
     }
 
-    // Extract parameters from path (e.g., /profile/:username)
     extractParams(pattern, path) {
         const patternParts = pattern.split('/').filter(Boolean);
         const pathParts = path.split('/').filter(Boolean);
@@ -33,12 +30,10 @@ class Router {
         return params;
     }
 
-    // Match current hash to a route
     matchRoute(hash) {
         const path = hash.slice(1) || '/';
         const [basePath, queryString] = path.split('?');
 
-        // Parse query parameters
         const query = {};
         if (queryString) {
             const searchParams = new URLSearchParams(queryString);
@@ -47,7 +42,6 @@ class Router {
             });
         }
 
-        // Try exact match first
         if (this.routes.has(basePath)) {
             return {
                 config: this.routes.get(basePath),
@@ -57,7 +51,6 @@ class Router {
             };
         }
 
-        // Try pattern matching
         for (const [pattern, config] of this.routes) {
             const params = this.extractParams(pattern, basePath);
             if (params !== null) {
@@ -68,18 +61,15 @@ class Router {
         return null;
     }
 
-    // Navigate to a path
     navigate(path) {
         window.location.hash = path;
     }
 
-    // Handle route change
     async handleRoute() {
         const hash = window.location.hash || '#/';
         const match = this.matchRoute(hash);
 
         if (!match) {
-            // 404 - redirect to home
             this.navigate('/');
             return;
         }
@@ -87,24 +77,20 @@ class Router {
         const { config, params, query } = match;
         this.params = params;
 
-        // Check if route requires authentication
         if (config.protected && !store.isAuthenticated()) {
             this.navigate('/login');
             return;
         }
 
-        // Check if route is for guests only
         if (config.guestOnly && store.isAuthenticated()) {
             this.navigate('/');
             return;
         }
 
-        // Destroy previous page if it has a destroy method
         if (this.currentPage?.destroy) {
             this.currentPage.destroy();
         }
 
-        // Initialize new page
         this.currentPage = config.pageModule;
 
         try {
@@ -115,7 +101,6 @@ class Router {
         }
     }
 
-    // Show error message
     showError(message) {
         const app = document.getElementById('app');
         app.innerHTML = `
@@ -127,13 +112,11 @@ class Router {
         `;
     }
 
-    // Initialize router
     init() {
         window.addEventListener('hashchange', () => this.handleRoute());
         window.addEventListener('load', () => this.handleRoute());
     }
 
-    // Get current params
     getParams() {
         return this.params;
     }

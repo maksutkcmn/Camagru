@@ -1,4 +1,3 @@
-// Camera and Canvas Utilities
 import { CONFIG } from '../config.js';
 
 class CameraManager {
@@ -12,7 +11,6 @@ class CameraManager {
         this.isRunning = false;
         this.animationId = null;
 
-        // Available filters
         this.filters = [
             { name: 'fire.png', label: 'Fire' },
             { name: 'thumbs-up.png', label: 'Thumbs Up' },
@@ -25,7 +23,6 @@ class CameraManager {
         ];
     }
 
-    // Initialize camera
     async init(videoElement, canvasElement) {
         this.video = videoElement;
         this.canvas = canvasElement;
@@ -44,19 +41,15 @@ class CameraManager {
             this.video.srcObject = this.stream;
             await this.video.play();
 
-            // Wait for video to be ready
             await new Promise(resolve => {
                 this.video.onloadedmetadata = resolve;
             });
 
-            // Set canvas dimensions
             this.canvas.width = this.video.videoWidth;
             this.canvas.height = this.video.videoHeight;
 
-            // Preload filters
             await this.preloadFilters();
 
-            // Start preview
             this.isRunning = true;
             this.startPreview();
 
@@ -67,17 +60,16 @@ class CameraManager {
         }
     }
 
-    // Preload filter images
     async preloadFilters() {
         const loadPromises = this.filters.map(filter => {
             return new Promise((resolve) => {
                 const img = new Image();
-                img.crossOrigin = 'anonymous'; // Enable CORS for canvas export
+                img.crossOrigin = 'anonymous';
                 img.onload = () => {
                     this.filterImages.set(filter.name, img);
                     resolve();
                 };
-                img.onerror = () => resolve(); // Continue even if filter fails to load
+                img.onerror = () => resolve();
                 img.src = `${CONFIG.API_URL}${CONFIG.FILTERS_PATH}/${filter.name}`;
             });
         });
@@ -85,18 +77,15 @@ class CameraManager {
         await Promise.all(loadPromises);
     }
 
-    // Start preview loop
     startPreview() {
         const draw = () => {
             if (!this.isRunning) return;
 
-            // Draw video frame (mirrored) - scale to fit canvas
             this.ctx.save();
             this.ctx.scale(-1, 1);
             this.ctx.drawImage(this.video, -this.canvas.width, 0, this.canvas.width, this.canvas.height);
             this.ctx.restore();
 
-            // Draw filter overlay
             if (this.selectedFilter) {
                 const filterImg = this.filterImages.get(this.selectedFilter);
                 if (filterImg) {
@@ -112,20 +101,16 @@ class CameraManager {
         draw();
     }
 
-    // Set filter
     setFilter(filterName) {
         this.selectedFilter = filterName || null;
     }
 
-    // Capture frame
     capture() {
-        // Draw final frame (mirrored) - scale to fit canvas
         this.ctx.save();
         this.ctx.scale(-1, 1);
         this.ctx.drawImage(this.video, -this.canvas.width, 0, this.canvas.width, this.canvas.height);
         this.ctx.restore();
 
-        // Draw filter
         if (this.selectedFilter) {
             const filterImg = this.filterImages.get(this.selectedFilter);
             if (filterImg) {
@@ -135,17 +120,14 @@ class CameraManager {
             }
         }
 
-        // Return base64 data
         return this.canvas.toDataURL('image/png');
     }
 
-    // Initialize canvas for file upload (when camera is not available)
     initCanvasForUpload(canvasElement) {
         this.canvas = canvasElement;
         this.ctx = canvasElement.getContext('2d');
     }
 
-    // Ensure canvas is ready (for file upload without camera)
     async ensureCanvasReady() {
         if (!this.canvas || !this.ctx) {
             const canvasEl = document.getElementById('camera-canvas');
@@ -154,15 +136,12 @@ class CameraManager {
                 this.ctx = canvasEl.getContext('2d');
             }
         }
-        // Ensure filters are preloaded
         if (this.filterImages.size === 0) {
             await this.preloadFilters();
         }
     }
 
-    // Load image from file
     async loadFromFile(file) {
-        // Ensure canvas is ready even without camera
         await this.ensureCanvasReady();
 
         if (!this.canvas || !this.ctx) {
@@ -175,7 +154,6 @@ class CameraManager {
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
-                    // Resize canvas to fit image
                     const maxWidth = 640;
                     const maxHeight = 480;
                     let width = img.width;
@@ -193,10 +171,8 @@ class CameraManager {
                     this.canvas.width = width;
                     this.canvas.height = height;
 
-                    // Draw image
                     this.ctx.drawImage(img, 0, 0, width, height);
 
-                    // Draw filter if selected
                     if (this.selectedFilter) {
                         const filterImg = this.filterImages.get(this.selectedFilter);
                         if (filterImg) {
@@ -217,9 +193,7 @@ class CameraManager {
         });
     }
 
-    // Redraw with new filter (for uploaded images)
     async redrawWithFilter(imageDataUrl) {
-        // Ensure canvas is ready
         await this.ensureCanvasReady();
 
         if (!this.canvas || !this.ctx) {
@@ -247,7 +221,6 @@ class CameraManager {
         });
     }
 
-    // Stop camera
     stop() {
         this.isRunning = false;
 
@@ -266,12 +239,10 @@ class CameraManager {
         }
     }
 
-    // Get available filters
     getFilters() {
         return this.filters;
     }
 
-    // Check if camera is supported
     isSupported() {
         return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
     }

@@ -1,4 +1,3 @@
-/* Profile Page */
 .profile-page {
     max-width: var(--max-width);
     margin: 0 auto;
@@ -72,9 +71,7 @@
     color: var(--text-primary);
 }
 
-/* Profile Content (Gallery) */
 .profile-content {
-    /* Gallery styles inherited from home.css */
 }
 
 .profile-tabs {
@@ -114,7 +111,6 @@
     height: 12px;
 }
 
-/* Mobile Responsive */
 @media (max-width: 768px) {
     .profile-header {
         flex-direction: column;
@@ -150,7 +146,6 @@
     }
 }
 
-/* Not Found State */
 .profile-not-found {
     text-align: center;
     padding: var(--spacing-2xl);

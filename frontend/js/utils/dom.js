@@ -1,16 +1,11 @@
-// DOM Utility Functions
-
-// Get element by selector
 export function $(selector) {
     return document.querySelector(selector);
 }
 
-// Get all elements by selector
 export function $$(selector) {
     return document.querySelectorAll(selector);
 }
 
-// Create element with attributes and children
 export function createElement(tag, attributes = {}, children = []) {
     const element = document.createElement(tag);
 
@@ -40,7 +35,6 @@ export function createElement(tag, attributes = {}, children = []) {
     return element;
 }
 
-// Render HTML string into a container
 export function render(container, html) {
     if (typeof container === 'string') {
         container = $(container);
@@ -50,7 +44,6 @@ export function render(container, html) {
     }
 }
 
-// Show loading state
 export function showLoading(container) {
     if (typeof container === 'string') {
         container = $(container);
@@ -65,39 +58,31 @@ export function showLoading(container) {
     }
 }
 
-// Format date
 export function formatDate(dateString) {
-    // Convert MySQL datetime format to ISO 8601 UTC for proper parsing
-    // "2024-01-29 10:30:00" -> "2024-01-29T10:30:00Z" (Z marks it as UTC)
     const isoString = dateString.replace(' ', 'T') + 'Z';
     const date = new Date(isoString);
     const now = new Date();
     const diff = now - date;
 
-    // Less than a minute
     if (diff < 60000) {
         return 'Just now';
     }
 
-    // Less than an hour
     if (diff < 3600000) {
         const minutes = Math.floor(diff / 60000);
         return `${minutes}m ago`;
     }
 
-    // Less than a day
     if (diff < 86400000) {
         const hours = Math.floor(diff / 3600000);
         return `${hours}h ago`;
     }
 
-    // Less than a week
     if (diff < 604800000) {
         const days = Math.floor(diff / 86400000);
         return `${days}d ago`;
     }
 
-    // Default: show date
     return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -105,14 +90,12 @@ export function formatDate(dateString) {
     });
 }
 
-// Escape HTML to prevent XSS
 export function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Debounce function
 export function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {

@@ -11,7 +11,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// CORS middleware
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -45,7 +44,6 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// API routes
 	mux.HandleFunc("POST /api/register", controllers.Register)
 	mux.HandleFunc("POST /api/login", controllers.Login)
 
@@ -70,11 +68,9 @@ func main() {
 
 	mux.HandleFunc("GET /verify", controllers.VerifyEmail)
 
-	// Static file serving for uploads and filters
 	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 	mux.Handle("/filters/", http.StripPrefix("/filters/", http.FileServer(http.Dir("filters"))))
 
-	// Apply CORS middleware
 	handler := corsMiddleware(mux)
 
 	log.Println("Server starting on :8080")
