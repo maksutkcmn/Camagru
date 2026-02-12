@@ -44,17 +44,26 @@ export const profilePage = {
             }
 
             this.user = userResponse.data;
-
-            if (this.isOwnProfile) {
-                const postsResponse = await postService.getUserPosts();
-                this.posts = postsResponse.data?.posts || [];
-            }
-
-            this.render();
         } catch (error) {
-            console.error('Failed to load profile:', error);
+            console.error('Failed to load user:', error);
             this.renderNotFound();
+            return;
         }
+
+        try {
+            let postsResponse;
+            if (this.isOwnProfile) {
+                postsResponse = await postService.getUserPosts();
+            } else {
+                postsResponse = await postService.getUserPostsByUsername(this.username);
+            }
+            this.posts = postsResponse.data?.posts || postsResponse.posts || [];
+        } catch (error) {
+            console.error('Failed to load posts:', error);
+            this.posts = [];
+        }
+
+        this.render();
     },
 
     render() {
@@ -90,46 +99,42 @@ export const profilePage = {
                     </div>
                 </div>
 
-                ${this.isOwnProfile ? `
-                    <div class="profile-tabs">
-                        <button class="profile-tab profile-tab--active">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="14" width="7" height="7"></rect>
-                                <rect x="3" y="14" width="7" height="7"></rect>
-                            </svg>
-                            Posts
-                        </button>
-                    </div>
+                <div class="profile-tabs">
+                    <button class="profile-tab profile-tab--active">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        Posts
+                    </button>
+                </div>
 
-                    <div class="profile-content">
-                        ${this.posts.length > 0 ? `
-                            <div class="gallery" id="posts-grid">
-                                ${this.posts.map(post => PostCard.renderGridItem(post, { showDelete: true })).join('')}
+                <div class="profile-content">
+                    ${this.posts.length > 0 ? `
+                        <div class="gallery" id="posts-grid">
+                            ${this.posts.map(post => PostCard.renderGridItem(post, { showDelete: this.isOwnProfile })).join('')}
+                        </div>
+                    ` : `
+                        <div class="empty-state">
+                            <div class="empty-state__icon">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
                             </div>
-                        ` : `
-                            <div class="empty-state">
-                                <div class="empty-state__icon">
-                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21 15 16 10 5 21"></polyline>
-                                    </svg>
-                                </div>
-                                <h2 class="empty-state__title">No Posts Yet</h2>
+                            <h2 class="empty-state__title">No Posts Yet</h2>
+                            ${this.isOwnProfile ? `
                                 <p class="empty-state__message">Share your first photo!</p>
                                 <a href="#/camera" class="btn btn--primary">Create Post</a>
-                            </div>
-                        `}
-                    </div>
-                ` : `
-                    <div class="profile-content">
-                        <div class="empty-state">
-                            <p class="text-muted">Posts are only visible on your own profile.</p>
+                            ` : `
+                                <p class="empty-state__message">${escapeHtml(this.user.username)} hasn't posted yet.</p>
+                            `}
                         </div>
-                    </div>
-                `}
+                    `}
+                </div>
             </div>
         `;
 

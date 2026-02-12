@@ -177,6 +177,88 @@ func GetUserPosts(w http.ResponseWriter, r *http.Request)  {
 	w.Write(responseBytes)
 }
 
+func GetUserPostsByUsername(w http.ResponseWriter, r *http.Request) {
+	_, err := services.GetUserIDFromRequest(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	username := r.PathValue("username")
+	if username == "" {
+		http.Error(w, "Username is required", http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	var targetUserID int
+	err = globals.DB.QueryRowContext(ctx, "SELECT id FROM users WHERE username = ?", username).Scan(&targetUserID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	query := `
+		SELECT
+			p.id,
+			p.user_id,
+			p.image_path,
+			(SELECT COUNT(*) FROM posts_likes WHERE post_id = p.id) as like_count,
+			(SELECT COUNT(*) FROM posts_comments WHERE post_id = p.id) as comment_count,
+			p.created_at
+		FROM posts p
+		WHERE p.user_id = ?
+		ORDER BY p.created_at DESC
+	`
+	rows, err := globals.DB.QueryContext(ctx, query, targetUserID)
+	if err != nil {
+		http.Error(w, "DB Error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var posts []models.PostDTO
+	for rows.Next() {
+		var post models.PostDTO
+		if err := rows.Scan(
+			&post.ID,
+			&post.UserID,
+			&post.ImagePath,
+			&post.LikeCount,
+			&post.CommentCount,
+			&post.CreatedAt,
+		); err != nil {
+			http.Error(w, "DB Error", http.StatusInternalServerError)
+			return
+		}
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		http.Error(w, "DB Error", http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse := map[string]interface{}{
+		"success": true,
+		"data": map[string]interface{}{
+			"posts": posts,
+		},
+	}
+
+	responseBytes, err := json.Marshal(jsonResponse)
+	if err != nil {
+		http.Error(w, "JSON cant create", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(responseBytes)
+}
+
 func GetPostComments(w http.ResponseWriter, r *http.Request)  {
 	_, err := services.GetUserIDFromRequest(r)
 	if err != nil {

@@ -63,6 +63,7 @@ func main() {
 	mux.HandleFunc("GET /api/get/me", controllers.GetMe)
 	mux.HandleFunc("GET /api/get/user/{username}", controllers.GetUserByID)
 	mux.HandleFunc("GET /api/get/posts", controllers.GetUserPosts)
+	mux.HandleFunc("GET /api/get/user/{username}/posts", controllers.GetUserPostsByUsername)
 	mux.HandleFunc("GET /api/get/post/comments/{post_id}", controllers.GetPostComments)
 	mux.HandleFunc("GET /api/get/feed", controllers.GetFeed)
 

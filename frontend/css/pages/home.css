@@ -158,6 +158,7 @@
 
 @media (max-width: 768px) {
     .gallery {
+        grid-template-columns: 1fr;
         gap: 2px;
     }
 

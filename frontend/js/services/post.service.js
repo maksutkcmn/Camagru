@@ -10,6 +10,10 @@ export const postService = {
         return api.get('/api/get/posts');
     },
 
+    async getUserPostsByUsername(username) {
+        return api.get(`/api/get/user/${encodeURIComponent(username)}/posts`);
+    },
+
     async createPost(imageData, filterName = '') {
         return api.post('/api/create/post', {
             image: imageData,
