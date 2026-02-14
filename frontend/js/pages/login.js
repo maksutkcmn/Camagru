@@ -51,7 +51,11 @@ export const loginPage = {
 
                     <div class="form-divider">or</div>
 
-                    <div class="text-center">
+                    <button type="button" class="btn btn--secondary btn--block" id="guest-btn">
+                        Continue as Guest
+                    </button>
+
+                    <div class="text-center" style="margin-top: var(--spacing-md);">
                         <a href="#/forgot-password" class="form-link">Forgot password?</a>
                     </div>
 
@@ -74,6 +78,13 @@ export const loginPage = {
             e.preventDefault();
             await this.handleSubmit(form);
         });
+
+        const guestBtn = $('#guest-btn');
+        if (guestBtn) {
+            guestBtn.addEventListener('click', () => {
+                router.navigate('/');
+            });
+        }
     },
 
     async handleSubmit(form) {

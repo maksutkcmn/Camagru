@@ -65,10 +65,17 @@ export const PostCard = {
 
     attachFeedEvents(container, options = {}) {
         const { onDelete, onLike } = options;
+        const isGuest = !store.isAuthenticated();
 
         container.querySelectorAll('.feed-card__like-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
+
+                if (isGuest) {
+                    Modal.alert('Please log in to like posts.', { title: 'Login Required' });
+                    return;
+                }
+
                 const postId = btn.dataset.postId;
 
                 try {
@@ -133,6 +140,8 @@ export const PostCard = {
     },
 
     async showCommentsModal(postId) {
+        const isGuest = !store.isAuthenticated();
+
         try {
             const response = await postService.getComments(postId);
             const comments = response.data?.comments || [];
@@ -165,51 +174,59 @@ export const PostCard = {
                 <div class="comment-list" id="comment-list">
                     ${commentsHtml}
                 </div>
-                <form class="comment-form" id="comment-form">
-                    <input type="text" name="comment" placeholder="Add a comment..." maxlength="255" required />
-                    <button type="submit" class="btn btn--primary">Post</button>
-                </form>
+                ${isGuest ? `
+                    <div style="padding: 12px 16px; text-align: center; border-top: 1px solid var(--border);">
+                        <a href="#/login" class="btn btn--primary btn--block">Log in to comment</a>
+                    </div>
+                ` : `
+                    <form class="comment-form" id="comment-form">
+                        <input type="text" name="comment" placeholder="Add a comment..." maxlength="255" required />
+                        <button type="submit" class="btn btn--primary">Post</button>
+                    </form>
+                `}
             `;
 
             const modal = Modal.show(content, { title: 'Comments', size: 'large' });
 
-            const form = modal.element.querySelector('#comment-form');
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const commentText = form.comment.value.trim();
-
-                if (commentText) {
-                    try {
-                        await postService.addComment(postId, commentText);
-                        form.comment.value = '';
-                        modal.close();
-                        this.showCommentsModal(postId);
-                    } catch (error) {
-                        console.error('Comment failed:', error);
-                    }
-                }
-            });
-
-            modal.element.querySelectorAll('.comment-item__delete').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
+            if (!isGuest) {
+                const form = modal.element.querySelector('#comment-form');
+                form.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    const commentId = btn.dataset.commentId;
+                    const commentText = form.comment.value.trim();
 
-                    try {
-                        await postService.deleteComment(commentId);
-                        const commentItem = btn.closest('.comment-item');
-                        if (commentItem) commentItem.remove();
-
-                        const commentList = modal.element.querySelector('#comment-list');
-                        if (!commentList.querySelector('.comment-item')) {
-                            commentList.innerHTML = '<p class="text-muted text-center">No comments yet</p>';
+                    if (commentText) {
+                        try {
+                            await postService.addComment(postId, commentText);
+                            form.comment.value = '';
+                            modal.close();
+                            this.showCommentsModal(postId);
+                        } catch (error) {
+                            console.error('Comment failed:', error);
                         }
-                    } catch (error) {
-                        console.error('Delete comment failed:', error);
-                        Modal.alert('Failed to delete comment.');
                     }
                 });
-            });
+
+                modal.element.querySelectorAll('.comment-item__delete').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        const commentId = btn.dataset.commentId;
+
+                        try {
+                            await postService.deleteComment(commentId);
+                            const commentItem = btn.closest('.comment-item');
+                            if (commentItem) commentItem.remove();
+
+                            const commentList = modal.element.querySelector('#comment-list');
+                            if (!commentList.querySelector('.comment-item')) {
+                                commentList.innerHTML = '<p class="text-muted text-center">No comments yet</p>';
+                            }
+                        } catch (error) {
+                            console.error('Delete comment failed:', error);
+                            Modal.alert('Failed to delete comment.');
+                        }
+                    });
+                });
+            }
 
         } catch (error) {
             console.error('Failed to load comments:', error);

@@ -32,7 +32,7 @@ class App {
 
         router.register('/verify', verifyEmailPage);
 
-        router.register('/', homePage, { protected: true });
+        router.register('/', homePage);
         router.register('/camera', cameraPage, { protected: true });
         router.register('/settings', settingsPage, { protected: true });
         router.register('/profile/:username', profilePage, { protected: true });

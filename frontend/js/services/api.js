@@ -29,11 +29,14 @@ class ApiService {
             const isAuthEndpoint = endpoint.includes('/login') || endpoint.includes('/register');
             const isSessionCheck = endpoint.includes('/get/me');
             if (response.status === 401 && !isAuthEndpoint) {
-                store.clearAuth();
-                if (!isSessionCheck) {
-                    router.navigate('/login');
+                if (store.getToken()) {
+                    store.clearAuth();
+                    if (!isSessionCheck) {
+                        router.navigate('/login');
+                    }
+                    throw new Error('Session expired. Please login again.');
                 }
-                throw new Error('Session expired. Please login again.');
+                throw new Error('Please log in to perform this action.');
             }
 
             const contentType = response.headers.get('content-type');

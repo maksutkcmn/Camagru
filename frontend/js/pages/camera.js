@@ -15,6 +15,7 @@ export const cameraPage = {
         this.uploadedImage = null;
         this.mode = 'camera';
         this.userPosts = [];
+        Camera.setFilter(null);
 
         this.render();
         this.attachEvents();
@@ -71,7 +72,7 @@ export const cameraPage = {
                         </div>
 
                         <div class="camera-controls">
-                            <button id="capture-btn" class="capture-btn" title="Capture Photo" disabled></button>
+                            <button id="capture-btn" class="capture-btn" title="Capture Photo"></button>
                             <label class="upload-label">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -127,10 +128,6 @@ export const cameraPage = {
                 const filterName = e.currentTarget.dataset.filter || null;
                 Camera.setFilter(filterName);
 
-                const captureBtn = $('#capture-btn');
-                if (captureBtn) {
-                    captureBtn.disabled = !filterName;
-                }
 
                 if (this.uploadedImage) {
                     this.redrawUploadedImage();
@@ -171,7 +168,7 @@ export const cameraPage = {
 
         try {
             this.uploadedImage = await Camera.loadFromFile(file);
-            this.capturedImage = this.uploadedImage;
+            this.capturedImage = await Camera.redrawWithFilter(this.uploadedImage);
             this.mode = 'upload';
             this.showPreview(this.capturedImage);
         } catch (error) {

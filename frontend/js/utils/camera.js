@@ -173,15 +173,6 @@ class CameraManager {
 
                     this.ctx.drawImage(img, 0, 0, width, height);
 
-                    if (this.selectedFilter) {
-                        const filterImg = this.filterImages.get(this.selectedFilter);
-                        if (filterImg) {
-                            const x = (this.canvas.width - filterImg.width) / 2;
-                            const y = (this.canvas.height - filterImg.height) / 2;
-                            this.ctx.drawImage(filterImg, x, y);
-                        }
-                    }
-
                     resolve(this.canvas.toDataURL('image/png'));
                 };
                 img.onerror = reject;

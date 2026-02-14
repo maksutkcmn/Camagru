@@ -260,12 +260,7 @@ func GetUserPostsByUsername(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPostComments(w http.ResponseWriter, r *http.Request)  {
-	_, err := services.GetUserIDFromRequest(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
+	// Allow guest access: comments are publicly viewable
 	postIDstr := r.PathValue("post_id")
 	postID, err := strconv.Atoi(postIDstr)
 	if err != nil {
@@ -327,11 +322,8 @@ func GetPostComments(w http.ResponseWriter, r *http.Request)  {
 }
 
 func GetFeed(w http.ResponseWriter, r *http.Request) {
-	userID, err := services.GetUserIDFromRequest(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
+	// Allow guest access: userID=0 means is_liked will always be false
+	userID, _ := services.GetUserIDFromRequest(r)
 
 	pageStr := r.URL.Query().Get("page")
 	limitStr := r.URL.Query().Get("limit")
@@ -358,7 +350,7 @@ func GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	var totalPosts int
 	countQuery := "SELECT COUNT(*) FROM posts"
-	err = globals.DB.QueryRowContext(ctx, countQuery).Scan(&totalPosts)
+	err := globals.DB.QueryRowContext(ctx, countQuery).Scan(&totalPosts)
 	if err != nil {
 		http.Error(w, "DB Error", http.StatusInternalServerError)
 		return

@@ -18,6 +18,7 @@ export const homePage = {
     },
 
     render() {
+        const isGuest = !store.isAuthenticated();
         const html = `
             <div class="home-page">
                 <div class="home-page__container">
@@ -37,8 +38,11 @@ export const homePage = {
                             </svg>
                         </div>
                         <h2 class="empty-state__title">No posts yet</h2>
-                        <p class="empty-state__message">Be the first to share a photo!</p>
-                        <a href="#/camera" class="btn btn--primary">Create Post</a>
+                        <p class="empty-state__message">${isGuest ? 'Log in to share a photo!' : 'Be the first to share a photo!'}</p>
+                        ${isGuest
+                            ? '<a href="#/login" class="btn btn--primary">Log In</a>'
+                            : '<a href="#/camera" class="btn btn--primary">Create Post</a>'
+                        }
                     </div>
                 </div>
             </div>
