@@ -84,7 +84,6 @@ export const homePage = {
                 this.renderPosts();
             }
         } catch (error) {
-            console.error('Failed to load posts:', error);
             container.innerHTML = `
                 <div class="alert alert--error">
                     Failed to load posts. Please try again.

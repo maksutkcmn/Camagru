@@ -72,7 +72,7 @@ export const cameraPage = {
                         </div>
 
                         <div class="camera-controls">
-                            <button id="capture-btn" class="capture-btn" title="Capture Photo"></button>
+                            <button id="capture-btn" class="capture-btn" title="Capture Photo" disabled></button>
                             <label class="upload-label">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -128,6 +128,10 @@ export const cameraPage = {
                 const filterName = e.currentTarget.dataset.filter || null;
                 Camera.setFilter(filterName);
 
+                const captureBtn = $('#capture-btn');
+                if (captureBtn) {
+                    captureBtn.disabled = !filterName;
+                }
 
                 if (this.uploadedImage) {
                     this.redrawUploadedImage();
@@ -186,7 +190,7 @@ export const cameraPage = {
                 previewImg.src = this.capturedImage;
             }
         } catch (error) {
-            console.error('Failed to redraw image:', error);
+            // silently handle redraw failure
         }
     },
 
@@ -224,7 +228,7 @@ export const cameraPage = {
             this.userPosts = response.data?.posts || response.posts || [];
             this.renderSidePhotos();
         } catch (error) {
-            console.error('Failed to load user photos:', error);
+            // silently handle photo load failure
         }
     },
 

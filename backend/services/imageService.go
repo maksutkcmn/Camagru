@@ -4,8 +4,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"image"
-	"image/png"
 	"image/draw"
+	_ "image/jpeg"
+	"image/png"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,12 +14,25 @@ import (
 	"github.com/google/uuid"
 )
 
+const maxImageSize = 5 * 1024 * 1024 // 5MB
+
 func CreateImage(base64Image string, filterName string) (string, error) {
 	parts := strings.Split(base64Image, ",")
 	if len(parts) != 2 {
-		return "" , fmt.Errorf("Unkown image format")
+		return "", fmt.Errorf("Unknown image format")
 	}
-	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(parts[1]))
+
+	header := strings.ToLower(parts[0])
+	if !strings.Contains(header, "image/png") && !strings.Contains(header, "image/jpeg") && !strings.Contains(header, "image/jpg") {
+		return "", fmt.Errorf("Only PNG and JPEG images are allowed")
+	}
+
+	rawData := parts[1]
+	if len(rawData) > maxImageSize {
+		return "", fmt.Errorf("Image size exceeds maximum allowed size (5MB)")
+	}
+
+	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(rawData))
 
 	bgImage, _, err := image.Decode(reader)
 	if err != nil {

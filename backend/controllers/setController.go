@@ -8,10 +8,15 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+var setUsernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
+var setEmailRegex = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
 
 func SetUsername(w http.ResponseWriter, r *http.Request) {
 
@@ -29,6 +34,16 @@ func SetUsername(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&new); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	new.Username = strings.TrimSpace(new.Username)
+	if len(new.Username) < 3 || len(new.Username) > 30 {
+		http.Error(w, "Username must be between 3 and 30 characters", http.StatusBadRequest)
+		return
+	}
+	if !setUsernameRegex.MatchString(new.Username) {
+		http.Error(w, "Username can only contain letters, numbers, and underscores", http.StatusBadRequest)
 		return
 	}
 
@@ -149,6 +164,12 @@ func SetEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&new); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	new.Email = strings.TrimSpace(new.Email)
+	if !setEmailRegex.MatchString(new.Email) {
+		http.Error(w, "Invalid email address", http.StatusBadRequest)
 		return
 	}
 
@@ -282,6 +303,11 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(req.NewPassword) < 6 {
+		http.Error(w, "Password must be at least 6 characters", http.StatusBadRequest)
 		return
 	}
 

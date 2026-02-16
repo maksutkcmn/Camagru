@@ -34,7 +34,6 @@ export const settingsPage = {
                 this.render();
             }
         } catch (error) {
-            console.error('Failed to load user:', error);
             router.navigate('/login');
         }
     },

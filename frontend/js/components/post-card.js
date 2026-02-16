@@ -100,7 +100,7 @@ export const PostCard = {
                         if (onLike) onLike(postId, response.data);
                     }
                 } catch (error) {
-                    console.error('Like failed:', error);
+                    // silently handle like failure
                 }
             });
         });
@@ -131,7 +131,6 @@ export const PostCard = {
                         if (feedCard) feedCard.remove();
                         if (onDelete) onDelete(postId);
                     } catch (error) {
-                        console.error('Delete failed:', error);
                         Modal.alert('Failed to delete post. Please try again.');
                     }
                 }
@@ -201,7 +200,7 @@ export const PostCard = {
                             modal.close();
                             this.showCommentsModal(postId);
                         } catch (error) {
-                            console.error('Comment failed:', error);
+                            Modal.alert('Failed to add comment.');
                         }
                     }
                 });
@@ -221,7 +220,6 @@ export const PostCard = {
                                 commentList.innerHTML = '<p class="text-muted text-center">No comments yet</p>';
                             }
                         } catch (error) {
-                            console.error('Delete comment failed:', error);
                             Modal.alert('Failed to delete comment.');
                         }
                     });
@@ -229,7 +227,6 @@ export const PostCard = {
             }
 
         } catch (error) {
-            console.error('Failed to load comments:', error);
             Modal.alert('Failed to load comments. Please try again.');
         }
     },
@@ -348,7 +345,7 @@ export const PostCard = {
                         if (onLike) onLike(postId, response.data);
                     }
                 } catch (error) {
-                    console.error('Like failed:', error);
+                    // silently handle like failure
                 }
             });
         });
@@ -379,7 +376,6 @@ export const PostCard = {
                         if (postCard) postCard.remove();
                         if (onDelete) onDelete(postId);
                     } catch (error) {
-                        console.error('Delete failed:', error);
                         Modal.alert('Failed to delete post. Please try again.');
                     }
                 }
@@ -413,7 +409,6 @@ export const PostCard = {
                         if (galleryItem) galleryItem.remove();
                         if (onDelete) onDelete(postId);
                     } catch (error) {
-                        console.error('Delete failed:', error);
                         Modal.alert('Failed to delete post. Please try again.');
                     }
                 }

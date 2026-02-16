@@ -55,7 +55,6 @@ class CameraManager {
 
             return true;
         } catch (error) {
-            console.error('Camera init error:', error);
             throw new Error('Unable to access camera. Please grant permission.');
         }
     }

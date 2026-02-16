@@ -8,10 +8,15 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
+var emailRegex = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
 
 func Register(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
@@ -23,7 +28,27 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
+	user.Username = strings.TrimSpace(user.Username)
+	user.Email = strings.TrimSpace(user.Email)
+
+	if len(user.Username) < 3 || len(user.Username) > 30 {
+		http.Error(w, "Username must be between 3 and 30 characters", http.StatusBadRequest)
+		return
+	}
+	if !usernameRegex.MatchString(user.Username) {
+		http.Error(w, "Username can only contain letters, numbers, and underscores", http.StatusBadRequest)
+		return
+	}
+	if !emailRegex.MatchString(user.Email) {
+		http.Error(w, "Invalid email address", http.StatusBadRequest)
+		return
+	}
+	if len(user.Password) < 6 {
+		http.Error(w, "Password must be at least 6 characters", http.StatusBadRequest)
+		return
+	}
+
 	query := "INSERT INTO users (username, email, password_hash, verification_token) VALUES (?, ?, ?, ?)"
 	
 	exec, err := globals.DB.PrepareContext(ctx, query)

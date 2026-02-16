@@ -47,7 +47,6 @@ class App {
             try {
                 await userService.getMe();
             } catch (error) {
-                console.log('Session expired, clearing auth');
                 store.clearAuth();
             }
         }

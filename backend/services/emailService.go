@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"html"
 	"net/smtp"
 	"os"
 )
@@ -86,24 +87,27 @@ func SendNotificationEmail(toEmail string, notification models.NotificationEmail
 func generateNotificationBody(notification models.NotificationEmail) string {
 	var content string
 
+	toName := html.EscapeString(notification.ToUsername)
+	fromName := html.EscapeString(notification.FromUsername)
+
 	switch notification.EmailType {
 	case models.EmailTypePostLiked:
 		content = fmt.Sprintf(`
 			<h2>Merhaba %s!</h2>
 			<p><strong>%s</strong> postunu beğendi.</p>
-		`, notification.ToUsername, notification.FromUsername)
-	
+		`, toName, fromName)
+
 	case models.EmailTypePostUnLiked:
 		content = fmt.Sprintf(`
 			<h2>Merhaba %s!</h2>
 			<p><strong>%s</strong> post beğenisini kaldırdı.</p>
-		`, notification.ToUsername, notification.FromUsername)
+		`, toName, fromName)
 
 	case models.EmailTypePostCommented:
 		content = fmt.Sprintf(`
 			<h2>Merhaba %s!</h2>
 			<p><strong>%s</strong> postuna yorum yaptı.</p>
-		`, notification.ToUsername, notification.FromUsername)
+		`, toName, fromName)
 
 	default:
 		content = "<p>Yeni bir bildiriminiz var.</p>"

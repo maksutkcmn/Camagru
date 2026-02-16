@@ -12,8 +12,13 @@ import (
 )
 
 func corsMiddleware(next http.Handler) http.Handler {
+	allowedOrigin := os.Getenv("FRONTEND_URL")
+	if allowedOrigin == "" {
+		allowedOrigin = "http://localhost:3000"
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
@@ -48,10 +53,10 @@ func main() {
 	mux.HandleFunc("POST /api/login", controllers.Login)
 
 	mux.HandleFunc("POST /api/create/post", controllers.CreatePost)
-	mux.HandleFunc("GET /api/delete/post/{post_id}", controllers.DeletePost)
+	mux.HandleFunc("DELETE /api/delete/post/{post_id}", controllers.DeletePost)
 	mux.HandleFunc("POST /api/comment/post", controllers.CommentPost)
-	mux.HandleFunc("GET /api/delete/comment/{comment_id}", controllers.DeleteComment)
-	mux.HandleFunc("GET /api/like/post/{post_id}", controllers.LikePost)
+	mux.HandleFunc("DELETE /api/delete/comment/{comment_id}", controllers.DeleteComment)
+	mux.HandleFunc("POST /api/like/post/{post_id}", controllers.LikePost)
 
 	mux.HandleFunc("PATCH /api/set/username", controllers.SetUsername)
 	mux.HandleFunc("PATCH /api/set/email", controllers.SetEmail)

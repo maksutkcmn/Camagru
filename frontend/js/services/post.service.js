@@ -22,11 +22,11 @@ export const postService = {
     },
 
     async deletePost(postId) {
-        return api.get(`/api/delete/post/${postId}`);
+        return api.delete(`/api/delete/post/${postId}`);
     },
 
     async likePost(postId) {
-        return api.get(`/api/like/post/${postId}`);
+        return api.post(`/api/like/post/${postId}`);
     },
 
     async addComment(postId, comment) {
@@ -41,7 +41,7 @@ export const postService = {
     },
 
     async deleteComment(commentId) {
-        return api.get(`/api/delete/comment/${commentId}`);
+        return api.delete(`/api/delete/comment/${commentId}`);
     },
 
     getImageUrl(imagePath) {

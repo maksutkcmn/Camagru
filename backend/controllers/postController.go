@@ -42,6 +42,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "DB Prepare Error", http.StatusInternalServerError)
 		return
 	}
+	defer exec.Close()
 
 	response, err := exec.ExecContext(ctx, userID, savedPath)
 	if err != nil {
@@ -219,28 +220,30 @@ func CommentPost(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	emailQuery := "SELECT username, email, notifications, is_verified FROM users WHERE id = ?"
-	var isVerified bool
-	var isNotifications bool
-	var toUsername string
-	var toEmail string
-	err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail, &isNotifications, &isVerified)
+	if userID != toUserID {
+		emailQuery := "SELECT username, email, notifications, is_verified FROM users WHERE id = ?"
+		var isVerified bool
+		var isNotifications bool
+		var toUsername string
+		var toEmail string
+		err = globals.DB.QueryRowContext(ctx, emailQuery, toUserID).Scan(&toUsername, &toEmail, &isNotifications, &isVerified)
 
-	if isVerified && isNotifications {
-		var fromUsername string
-		err = globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
-		
-		notifications := models.NotificationEmail{
-			ToUsername:   toUsername,
-			FromUserID:   int64(userID),
-			FromUsername: fromUsername,
-			EmailType:    models.EmailTypePostCommented,
-			PostID:       int64(comment.PostID),
-		}
-		
-		if err = services.SendNotificationEmail(toEmail, notifications); err != nil {
-			http.Error(w, "Email not send", http.StatusInternalServerError)
-			return
+		if isVerified && isNotifications {
+			var fromUsername string
+			err = globals.DB.QueryRowContext(ctx, "SELECT username FROM users WHERE id = ?", userID).Scan(&fromUsername)
+
+			notifications := models.NotificationEmail{
+				ToUsername:   toUsername,
+				FromUserID:   int64(userID),
+				FromUsername: fromUsername,
+				EmailType:    models.EmailTypePostCommented,
+				PostID:       int64(comment.PostID),
+			}
+
+			if err = services.SendNotificationEmail(toEmail, notifications); err != nil {
+				http.Error(w, "Email not send", http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 		

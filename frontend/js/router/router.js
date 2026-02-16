@@ -96,7 +96,6 @@ class Router {
         try {
             await config.pageModule.init(params, query);
         } catch (error) {
-            console.error('Error initializing page:', error);
             this.showError('An error occurred while loading the page.');
         }
     }

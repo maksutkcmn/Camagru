@@ -45,7 +45,6 @@ export const profilePage = {
 
             this.user = userResponse.data;
         } catch (error) {
-            console.error('Failed to load user:', error);
             this.renderNotFound();
             return;
         }
@@ -59,7 +58,6 @@ export const profilePage = {
             }
             this.posts = postsResponse.data?.posts || postsResponse.posts || [];
         } catch (error) {
-            console.error('Failed to load posts:', error);
             this.posts = [];
         }
 
