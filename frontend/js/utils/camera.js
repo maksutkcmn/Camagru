@@ -110,15 +110,6 @@ class CameraManager {
         this.ctx.drawImage(this.video, -this.canvas.width, 0, this.canvas.width, this.canvas.height);
         this.ctx.restore();
 
-        if (this.selectedFilter) {
-            const filterImg = this.filterImages.get(this.selectedFilter);
-            if (filterImg) {
-                const x = (this.canvas.width - filterImg.width) / 2;
-                const y = (this.canvas.height - filterImg.height) / 2;
-                this.ctx.drawImage(filterImg, x, y);
-            }
-        }
-
         return this.canvas.toDataURL('image/png');
     }
 

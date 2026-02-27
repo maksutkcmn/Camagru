@@ -7,9 +7,20 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
+
+func securityHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		next.ServeHTTP(w, r)
+	})
+}
 
 func corsMiddleware(next http.Handler) http.Handler {
 	allowedOrigin := os.Getenv("FRONTEND_URL")
@@ -74,10 +85,20 @@ func main() {
 
 	mux.HandleFunc("GET /verify", controllers.VerifyEmail)
 
-	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
+	mux.HandleFunc("/uploads/", func(w http.ResponseWriter, r *http.Request) {
+		name := filepath.Base(strings.TrimPrefix(r.URL.Path, "/uploads/"))
+		filePath := filepath.Join("uploads", name)
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.Header().Set("Content-Disposition", "inline")
+		http.ServeFile(w, r, filePath)
+	})
 	mux.Handle("/filters/", http.StripPrefix("/filters/", http.FileServer(http.Dir("filters"))))
 
-	handler := corsMiddleware(mux)
+	handler := securityHeadersMiddleware(corsMiddleware(mux))
 
 	log.Println("Server starting on :8080")
 	http.ListenAndServe(":8080", handler)

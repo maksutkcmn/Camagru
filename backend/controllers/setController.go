@@ -306,8 +306,21 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.NewPassword) < 6 {
-		http.Error(w, "Password must be at least 6 characters", http.StatusBadRequest)
+	if len(req.NewPassword) < 8 {
+		http.Error(w, "Password must be at least 8 characters", http.StatusBadRequest)
+		return
+	}
+	hasUpper, hasDigit := false, false
+	for _, c := range req.NewPassword {
+		if c >= 'A' && c <= 'Z' {
+			hasUpper = true
+		}
+		if c >= '0' && c <= '9' {
+			hasDigit = true
+		}
+	}
+	if !hasUpper || !hasDigit {
+		http.Error(w, "Password must contain at least one uppercase letter and one number", http.StatusBadRequest)
 		return
 	}
 

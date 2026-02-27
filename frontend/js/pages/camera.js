@@ -43,7 +43,6 @@ export const cameraPage = {
                 <h1 class="camera-page__title">Create a Photo</h1>
 
                 <div class="editor-layout">
-                    <!-- LEFT COLUMN: Main editor -->
                     <div class="editor-main">
                         <div class="camera-preview" id="camera-preview">
                             <video id="camera-video" class="camera-preview__video" autoplay playsinline muted></video>
@@ -96,7 +95,6 @@ export const cameraPage = {
                         </div>
                     </div>
 
-                    <!-- RIGHT COLUMN: History sidebar -->
                     <aside class="editor-side">
                         <div class="editor-side__header">History</div>
                         <div id="side-photo-list" class="editor-side__list">
@@ -172,9 +170,10 @@ export const cameraPage = {
 
         try {
             this.uploadedImage = await Camera.loadFromFile(file);
-            this.capturedImage = await Camera.redrawWithFilter(this.uploadedImage);
+            this.capturedImage = this.uploadedImage;
             this.mode = 'upload';
-            this.showPreview(this.capturedImage);
+            const previewComposite = await Camera.redrawWithFilter(this.uploadedImage);
+            this.showPreview(previewComposite);
         } catch (error) {
             Modal.alert('Failed to load image. Please try another file.');
         }
@@ -184,13 +183,12 @@ export const cameraPage = {
         if (!this.uploadedImage) return;
 
         try {
-            this.capturedImage = await Camera.redrawWithFilter(this.uploadedImage);
+            const composite = await Camera.redrawWithFilter(this.uploadedImage);
             const previewImg = $('#captured-preview-img');
             if (previewImg) {
-                previewImg.src = this.capturedImage;
+                previewImg.src = composite;
             }
         } catch (error) {
-            // silently handle redraw failure
         }
     },
 
@@ -228,7 +226,6 @@ export const cameraPage = {
             this.userPosts = response.data?.posts || response.posts || [];
             this.renderSidePhotos();
         } catch (error) {
-            // silently handle photo load failure
         }
     },
 
@@ -293,12 +290,17 @@ export const cameraPage = {
     async submitPost() {
         if (!this.capturedImage) return;
 
+        const selectedFilter = document.querySelector('.filter-btn--active')?.dataset.filter || '';
+        if (!selectedFilter) {
+            Modal.alert('Please select a filter before posting.', { title: 'Filter Required' });
+            return;
+        }
+
         const postBtn = $('#post-btn');
         postBtn.disabled = true;
         postBtn.textContent = 'Posting...';
 
         try {
-            const selectedFilter = document.querySelector('.filter-btn--active')?.dataset.filter || '';
 
             await postService.createPost(this.capturedImage, selectedFilter);
 

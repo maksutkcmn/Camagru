@@ -260,7 +260,6 @@ func GetUserPostsByUsername(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPostComments(w http.ResponseWriter, r *http.Request)  {
-	// Allow guest access: comments are publicly viewable
 	postIDstr := r.PathValue("post_id")
 	postID, err := strconv.Atoi(postIDstr)
 	if err != nil {
@@ -322,7 +321,6 @@ func GetPostComments(w http.ResponseWriter, r *http.Request)  {
 }
 
 func GetFeed(w http.ResponseWriter, r *http.Request) {
-	// Allow guest access: userID=0 means is_liked will always be false
 	userID, _ := services.GetUserIDFromRequest(r)
 
 	pageStr := r.URL.Query().Get("page")

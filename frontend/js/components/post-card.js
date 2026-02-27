@@ -100,7 +100,6 @@ export const PostCard = {
                         if (onLike) onLike(postId, response.data);
                     }
                 } catch (error) {
-                    // silently handle like failure
                 }
             });
         });
@@ -345,7 +344,6 @@ export const PostCard = {
                         if (onLike) onLike(postId, response.data);
                     }
                 } catch (error) {
-                    // silently handle like failure
                 }
             });
         });

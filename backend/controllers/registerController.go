@@ -44,8 +44,21 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid email address", http.StatusBadRequest)
 		return
 	}
-	if len(user.Password) < 6 {
-		http.Error(w, "Password must be at least 6 characters", http.StatusBadRequest)
+	if len(user.Password) < 8 {
+		http.Error(w, "Password must be at least 8 characters", http.StatusBadRequest)
+		return
+	}
+	hasUpper, hasDigit := false, false
+	for _, c := range user.Password {
+		if c >= 'A' && c <= 'Z' {
+			hasUpper = true
+		}
+		if c >= '0' && c <= '9' {
+			hasDigit = true
+		}
+	}
+	if !hasUpper || !hasDigit {
+		http.Error(w, "Password must contain at least one uppercase letter and one number", http.StatusBadRequest)
 		return
 	}
 

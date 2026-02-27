@@ -1,12 +1,14 @@
 package services
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"image"
 	"image/draw"
 	_ "image/jpeg"
 	"image/png"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +16,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const maxImageSize = 5 * 1024 * 1024 // 5MB
+const maxImageSize = 5 * 1024 * 1024
 
 func CreateImage(base64Image string, filterName string) (string, error) {
 	parts := strings.Split(base64Image, ",")
@@ -32,9 +34,17 @@ func CreateImage(base64Image string, filterName string) (string, error) {
 		return "", fmt.Errorf("Image size exceeds maximum allowed size (5MB)")
 	}
 
-	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(rawData))
+	decoded, err := base64.StdEncoding.DecodeString(rawData)
+	if err != nil {
+		return "", fmt.Errorf("Invalid base64 data")
+	}
 
-	bgImage, _, err := image.Decode(reader)
+	detectedType := http.DetectContentType(decoded)
+	if detectedType != "image/png" && detectedType != "image/jpeg" {
+		return "", fmt.Errorf("Only PNG and JPEG images are allowed")
+	}
+
+	bgImage, _, err := image.Decode(bytes.NewReader(decoded))
 	if err != nil {
 		return "", fmt.Errorf("Image not decoded")
 	}
@@ -44,6 +54,22 @@ func CreateImage(base64Image string, filterName string) (string, error) {
     draw.Draw(rgba, bounds, bgImage, image.Point{0, 0}, draw.Src)
 
     if filterName != "" {
+        filterName = filepath.Base(filterName)
+
+        allowedFilters := map[string]bool{
+            "fire.png":      true,
+            "thumbs-up.png": true,
+            "camera.png":    true,
+            "lightning.png":  true,
+            "cool.png":      true,
+            "heart.png":     true,
+            "star.png":      true,
+            "smile.png":     true,
+        }
+        if !allowedFilters[filterName] {
+            return "", fmt.Errorf("Invalid filter name")
+        }
+
         filterPath := filepath.Join("filters", filterName)
 
         if _, err := os.Stat(filterPath); err == nil {
