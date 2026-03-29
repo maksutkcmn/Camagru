@@ -113,7 +113,7 @@ class Router {
 
     init() {
         window.addEventListener('hashchange', () => this.handleRoute());
-        window.addEventListener('load', () => this.handleRoute());
+        this.handleRoute();
     }
 
     getParams() {

@@ -33,7 +33,7 @@ export const validators = {
 
     username: (value) => {
         if (!value) return null;
-        const usernameRegex = /^[a-zA-Z0-9_]+$/;
+        const usernameRegex = /^[a-zA-Z0-9_]+$/;    
         if (!usernameRegex.test(value)) {
             return 'Username can only contain letters, numbers, and underscores';
         }
