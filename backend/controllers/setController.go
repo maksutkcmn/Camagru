@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -22,7 +23,7 @@ func SetUsername(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -33,7 +34,8 @@ func SetUsername(w http.ResponseWriter, r *http.Request) {
 		Username string `json:"username" binding:"required"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&new); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("SetUsername: decode error: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -55,7 +57,8 @@ func SetUsername(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Prepare Error: " + err.Error(), http.StatusInternalServerError)
+		log.Printf("SetUsername: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer exec.Close()
@@ -79,7 +82,8 @@ func SetUsername(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Prepare Error: " + err.Error(), http.StatusInternalServerError)
+		log.Printf("SetUsername: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer getUser.Close()
@@ -108,7 +112,8 @@ func SetUsername(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Prepare Error: " + err.Error(), http.StatusInternalServerError)
+		log.Printf("SetUsername: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer SetUsername.Close()
@@ -118,7 +123,8 @@ func SetUsername(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Error: " + err.Error(), http.StatusInternalServerError)
+		log.Printf("SetUsername: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -136,13 +142,13 @@ func SetUsername(w http.ResponseWriter, r *http.Request) {
             "username": new.Username,
         },
 	}
-	
+
 	responseBytes, err := json.Marshal(jsonResponse)
     if err != nil {
 		http.Error(w, "JSON cant create", http.StatusInternalServerError)
         return
     }
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(responseBytes)
@@ -152,7 +158,7 @@ func SetEmail(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -163,7 +169,8 @@ func SetEmail(w http.ResponseWriter, r *http.Request) {
 		Email string `json:"email" binding:"required"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&new); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("SetEmail: decode error: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -181,7 +188,8 @@ func SetEmail(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Prepare Error: "+err.Error(), http.StatusInternalServerError)
+		log.Printf("SetEmail: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer exec.Close()
@@ -205,7 +213,8 @@ func SetEmail(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Prepare Error: "+err.Error(), http.StatusInternalServerError)
+		log.Printf("SetEmail: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer getUser.Close()
@@ -240,7 +249,8 @@ func SetEmail(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Prepare Error: "+err.Error(), http.StatusInternalServerError)
+		log.Printf("SetEmail: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer setEmail.Close()
@@ -251,7 +261,8 @@ func SetEmail(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Error: "+err.Error(), http.StatusInternalServerError)
+		log.Printf("SetEmail: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -290,7 +301,7 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -302,7 +313,8 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 		NewPassword     string `json:"new_password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("SetPassword: decode error: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -332,7 +344,8 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Prepare Error: "+err.Error(), http.StatusInternalServerError)
+		log.Printf("SetPassword: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer getUser.Close()
@@ -372,7 +385,8 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Prepare Error: "+err.Error(), http.StatusInternalServerError)
+		log.Printf("SetPassword: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer setPassword.Close()
@@ -383,7 +397,8 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, "DB Error: "+err.Error(), http.StatusInternalServerError)
+		log.Printf("SetPassword: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 

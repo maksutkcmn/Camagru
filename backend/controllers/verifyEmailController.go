@@ -4,6 +4,7 @@ import (
 	"camagru/globals"
 	"context"
 	"errors"
+	"log"
 	"net/http"
 	"time"
 )
@@ -33,7 +34,9 @@ func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("VerifyEmail: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
 
 	rowsAffected, _ := result.RowsAffected()

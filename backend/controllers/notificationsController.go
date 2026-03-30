@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"time"
 )
@@ -13,7 +14,7 @@ import (
 func SetNotifications(w http.ResponseWriter, r *http.Request) {
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -40,7 +41,8 @@ func SetNotifications(w http.ResponseWriter, r *http.Request) {
 
 	exec, err := globals.DB.PrepareContext(ctx, query)
 	if err != nil {
-		http.Error(w, "DB Prepare Error" + err.Error(), http.StatusInternalServerError)
+		log.Printf("SetNotifications: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer exec.Close()

@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"time"
 
@@ -20,12 +21,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var loginData models.LoginDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&loginData); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Login: decode error: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
 	query := "SELECT id, username, email, password_hash, is_verified FROM users WHERE username = ?"
-	
+
 	exec, err := globals.DB.PrepareContext(ctx, query)
 	if err != nil {
 		http.Error(w, "DB Prepare Error", http.StatusInternalServerError)
@@ -79,7 +81,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "JSON cant create", http.StatusInternalServerError)
         return
     }
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(responseBytes)

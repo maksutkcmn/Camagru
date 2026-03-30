@@ -6,9 +6,19 @@ import (
 	"encoding/hex"
 	"fmt"
 	"html"
+	"log"
 	"net/smtp"
 	"os"
 )
+
+func ValidateEmailConfig() {
+	vars := []string{"SMTP_FROM", "SMTP_PASSWORD", "SMTP_HOST", "SMTP_PORT", "APP_URL"}
+	for _, v := range vars {
+		if os.Getenv(v) == "" {
+			log.Fatalf("required environment variable %q is not set", v)
+		}
+	}
+}
 
 func GenerateVerifyToken() (string, error) {
 	bytes := make([]byte, 16)

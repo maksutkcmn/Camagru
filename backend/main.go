@@ -3,7 +3,7 @@ package main
 import (
 	"camagru/controllers"
 	"camagru/globals"
-	"fmt"
+	"camagru/services"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +12,14 @@ import (
 
 	"github.com/joho/godotenv"
 )
+
+func requireEnv(key string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		log.Fatalf("required environment variable %q is not set", key)
+	}
+	return val
+}
 
 func securityHeadersMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -22,12 +30,7 @@ func securityHeadersMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func corsMiddleware(next http.Handler) http.Handler {
-	allowedOrigin := os.Getenv("FRONTEND_URL")
-	if allowedOrigin == "" {
-		allowedOrigin = "http://localhost:3000"
-	}
-
+func corsMiddleware(allowedOrigin string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
@@ -47,14 +50,20 @@ func main() {
 		log.Println("Warning: .env file not found")
 	}
 
-	dsn := os.Getenv("DB_DSN")
-	if dsn == "" {
-		log.Fatal("DB_DSN environment variable is not set")
-	}
+	dsn := requireEnv("DB_DSN")
+	frontendURL := requireEnv("FRONTEND_URL")
+	requireEnv("JWT_SECRET")
+	requireEnv("SMTP_FROM")
+	requireEnv("SMTP_PASSWORD")
+	requireEnv("SMTP_HOST")
+	requireEnv("SMTP_PORT")
+	requireEnv("APP_URL")
+
+	services.InitJWT()
+	services.ValidateEmailConfig()
 
 	if err := globals.InitDB(dsn); err != nil {
-		fmt.Printf("Error initializing database: %v\n", err)
-		return
+		log.Fatalf("failed to initialize database: %v", err)
 	}
 	defer globals.CloseDB()
 
@@ -98,7 +107,7 @@ func main() {
 	})
 	mux.Handle("/filters/", http.StripPrefix("/filters/", http.FileServer(http.Dir("filters"))))
 
-	handler := securityHeadersMiddleware(corsMiddleware(mux))
+	handler := securityHeadersMiddleware(corsMiddleware(frontendURL, mux))
 
 	log.Println("Server starting on :8080")
 	http.ListenAndServe(":8080", handler)

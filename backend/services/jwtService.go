@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -10,7 +11,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte(os.Getenv("JWT_SECRET"))
+var jwtKey []byte
+
+func InitJWT() {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		log.Fatal("required environment variable \"JWT_SECRET\" is not set")
+	}
+	jwtKey = []byte(secret)
+}
 
 type Claims struct {
 	UserID		int		`json:"userid"`

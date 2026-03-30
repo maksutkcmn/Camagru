@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -23,9 +24,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var user models.User
-	
+
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Register: decode error: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -63,7 +65,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := "INSERT INTO users (username, email, password_hash, verification_token) VALUES (?, ?, ?, ?)"
-	
+
 	exec, err := globals.DB.PrepareContext(ctx, query)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
@@ -86,23 +88,24 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Verify Email Send Error", http.StatusInternalServerError)
 		return
 	}
-	
+
 	response, err := exec.ExecContext(ctx, user.Username, user.Email, hashedPassword, verifyToken)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Register: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	
+
 	rowsAffected, _ := response.RowsAffected()
 	if rowsAffected == 0 {
 		http.Error(w, "No rows were inserted", http.StatusInternalServerError)
 		return
 	}
-	
+
 	userID, err := response.LastInsertId()
 	if err != nil {
 		http.Error(w, "Error getting userID", http.StatusInternalServerError)
@@ -113,7 +116,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Email not Send", http.StatusInternalServerError)
 		return
 	}
-	
+
 	jsonResponse := map[string]interface{}{
 		"success": true,
         "message": "Kayıt başarılı! Lütfen hesabınızı doğrulamak için e-posta kutunuzu kontrol edin.",
@@ -123,13 +126,13 @@ func Register(w http.ResponseWriter, r *http.Request) {
             "email":    user.Email,
         },
 	}
-	
+
 	responseBytes, err := json.Marshal(jsonResponse)
     if err != nil {
 		http.Error(w, "JSON cant create", http.StatusInternalServerError)
         return
     }
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(responseBytes)

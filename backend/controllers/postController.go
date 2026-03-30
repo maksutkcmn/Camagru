@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -19,7 +20,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -31,8 +32,9 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	savedPath, err := services.CreateImage(post.ImageData, post.FilterName)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return 
+		log.Printf("CreatePost: image error: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
 	}
 
 	query := "INSERT INTO posts (user_id, image_path) VALUES (?, ?)"
@@ -50,7 +52,8 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("CreatePost: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -80,7 +83,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "JSON cant create", http.StatusInternalServerError)
         return
     }
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(responseBytes)
@@ -89,7 +92,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 func DeletePost(w http.ResponseWriter, r *http.Request) {
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -130,7 +133,8 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("DeletePost: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -163,7 +167,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 func CommentPost(w http.ResponseWriter, r *http.Request)  {
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -204,7 +208,8 @@ func CommentPost(w http.ResponseWriter, r *http.Request)  {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("CommentPost: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -246,7 +251,7 @@ func CommentPost(w http.ResponseWriter, r *http.Request)  {
 			}
 		}
 	}
-		
+
 	jsonResponse := map[string]interface{}{
 		"success": true,
 		"message": "Yorum eklendi",
@@ -271,7 +276,7 @@ func CommentPost(w http.ResponseWriter, r *http.Request)  {
 func LikePost(w http.ResponseWriter, r *http.Request)  {
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -314,7 +319,8 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 
 	exec, err := globals.DB.PrepareContext(ctx, query)
 	if err != nil {
-		http.Error(w, "DB Prepare Error" + err.Error(), http.StatusInternalServerError)
+		log.Printf("LikePost: db prepare error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer exec.Close()
@@ -325,7 +331,8 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("LikePost: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -357,7 +364,7 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 			services.SendNotificationEmail(toEmail, notifications)
 		}
 	}
-		
+
 	var newLikeCount int
 	countQuery := "SELECT COUNT(*) FROM posts_likes WHERE post_id = ?"
 	globals.DB.QueryRowContext(ctx, countQuery, postID).Scan(&newLikeCount)
@@ -387,7 +394,7 @@ func LikePost(w http.ResponseWriter, r *http.Request)  {
 func DeleteComment(w http.ResponseWriter, r *http.Request) {
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -428,7 +435,8 @@ func DeleteComment(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("DeleteComment: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 

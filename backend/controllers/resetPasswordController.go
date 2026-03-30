@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"time"
 
@@ -16,7 +17,7 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	var req struct {
         Email string `json:"email"`
     }
-    
+
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         http.Error(w, "Bad Input", 400)
         return
@@ -50,7 +51,8 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("ForgotPassword: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -69,13 +71,13 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
             "email":    req.Email,
         },
 	}
-	
+
 	responseBytes, err := json.Marshal(jsonResponse)
     if err != nil {
 		http.Error(w, "JSON cant create", http.StatusInternalServerError)
         return
     }
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(responseBytes)

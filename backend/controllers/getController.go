@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,7 +16,7 @@ import (
 func GetMe(w http.ResponseWriter, r *http.Request) {
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -31,7 +32,8 @@ func GetMe(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("GetMe: db error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -61,7 +63,7 @@ func GetMe(w http.ResponseWriter, r *http.Request) {
 func GetUserByID(w http.ResponseWriter, r *http.Request)  {
 	_, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -110,7 +112,7 @@ func GetUserByID(w http.ResponseWriter, r *http.Request)  {
 func GetUserPosts(w http.ResponseWriter, r *http.Request)  {
 	userID, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -180,7 +182,7 @@ func GetUserPosts(w http.ResponseWriter, r *http.Request)  {
 func GetUserPostsByUsername(w http.ResponseWriter, r *http.Request) {
 	_, err := services.GetUserIDFromRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 

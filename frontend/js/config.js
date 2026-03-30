@@ -1,5 +1,5 @@
 export const CONFIG = {
-    API_URL: 'http://localhost:8080',
+    API_URL: `${window.location.protocol}//${window.location.hostname}:8080`,
     UPLOADS_PATH: '/uploads',
     FILTERS_PATH: '/filters',
     JWT_STORAGE_KEY: 'camagru_token',
