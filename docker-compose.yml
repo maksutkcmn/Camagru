@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # MySQL Database
   database:
     image: mysql:8.0
     container_name: camagru_db
@@ -22,7 +21,6 @@ services:
       retries: 10
       interval: 5s
 
-  # Backend (Go API)
   backend:
     build:
       context: ./backend
@@ -49,7 +47,6 @@ services:
     networks:
       - camagru_network
 
-  # Frontend (Vanilla JS)
   frontend:
     build:
       context: ./frontend
